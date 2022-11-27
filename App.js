@@ -1,13 +1,19 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import "react-native-gesture-handler";
+import { StyleSheet } from "react-native";
+import { React, useEffect } from "react";
+import SplashScreen from "react-native-splash-screen";
+import store from "./src/config/redux/store";
+import { Provider } from "react-redux";
+import AppNavigation from "./src/navigations/AppNavigation";
 
 const App = () => {
+  useEffect(() => {
+    SplashScreen.hide();
+  });
   return (
-    <View>
-      <Text>teach e</Text>
-      <Icon name="rocket" size={30} color="#900" />
-    </View>
+    <Provider store={store}>
+      <AppNavigation />
+    </Provider>
   );
 };
 
