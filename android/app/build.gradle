@@ -86,6 +86,9 @@ apply from: "../../node_modules/react-native/react.gradle"
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
+
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
@@ -259,6 +262,11 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     implementation project(':react-native-vector-icons')
+
+    implementation project(':react-native-splash-screen')
+
+    implementation project(':react-native-config')
+    
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
