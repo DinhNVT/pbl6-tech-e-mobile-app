@@ -6,6 +6,7 @@ import {
   Image,
   Keyboard,
   Text,
+  TouchableOpacity,
 } from "react-native";
 import { React, useState } from "react";
 
@@ -16,15 +17,25 @@ import ButtonFilled from "../component/ButtonFilled";
 import AuthenticationService from "../config/service/AuthenticationService";
 import { useDispatch } from "react-redux";
 import { setDataUser, setTokenUser } from "../config/redux/features/authSlice";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import Loading from "../component/Loading";
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("user01");
-  const [password, setPassword] = useState("user01");
+  const [email, setEmail] = useState("huudinh22122001");
+  const [password, setPassword] = useState("123456");
   const [isLogin, setIsLogin] = useState(false);
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleShowPassword = () => {
+    setIsShowPassword(!isShowPassword);
+  };
 
   const dispatch = useDispatch();
-  
+
   const handleLogin = async () => {
+    setIsLoading(false)
+    setIsLoading(true)
     let data = await AuthenticationService.postLogin({
       username: email,
       password: password,
@@ -35,7 +46,7 @@ const LoginScreen = ({ navigation }) => {
       .catch((error) => {
         console.log(error);
       });
-    if (data.message == "login is success!") {
+    if (data.message == "login is success!" && data.data.role != "ADMIN") {
       AuthenticationService.saveDataLogin(data);
       dispatch(setDataUser(data.data));
       dispatch(
@@ -44,9 +55,11 @@ const LoginScreen = ({ navigation }) => {
           access: data.token.access,
         })
       );
+      setIsLoading(false)
       setIsLogin(true);
       navigation.navigate("TabStack");
     } else {
+      setIsLoading(false)
       setIsLogin("incorrect");
     }
     // let dataUser = await AuthenticationService.getDataUser();
@@ -64,6 +77,7 @@ const LoginScreen = ({ navigation }) => {
         <View
           style={{ alignItems: "center", width: "100%", marginVertical: 24 }}
         >
+          {isLoading ? <Loading /> : null}
           <View style={styles.imageView}>
             <Image
               style={styles.image}
@@ -89,7 +103,7 @@ const LoginScreen = ({ navigation }) => {
                 { color: AppStyles.ColorStyles.color.error_400 },
               ]}
             >
-              Username or password is not correct
+              Sai tài khoản hoặc mật khẩu
             </Text>
           ) : null}
           <View style={styles.inputView}>
@@ -112,16 +126,37 @@ const LoginScreen = ({ navigation }) => {
               onChangeText={setPassword}
               placeholder="Nhập Mật Khẩu"
               style={styles.inputText}
-              secureTextEntry={true}
+              secureTextEntry={isShowPassword ? false : true}
             />
+            <TouchableOpacity
+              onPress={handleShowPassword}
+              style={styles.eyePassword}
+              activeOpacity={0.9}
+            >
+              <Icon
+                name={isShowPassword ? "eye-slash" : "eye"}
+                size={20}
+                color={"gray"}
+              />
+            </TouchableOpacity>
           </View>
           <ButtonOutlined onPress={handleLogin} style={styles.button}>
             Đăng nhập
           </ButtonOutlined>
-          <Text style={[styles.textReset, AppStyles.FontStyle.body_2]}>
+          <Text
+            onPress={() => {
+              navigation.navigate("ResetPasswordScreen");
+            }}
+            style={[styles.textReset, AppStyles.FontStyle.body_2]}
+          >
             Quên mật khẩu?
           </Text>
-          <ButtonFilled style={{ width: "80%", marginBottom: 24 }}>
+          <ButtonFilled
+            onPress={() => {
+              navigation.navigate("SignUpScreen");
+            }}
+            style={{ width: "80%", marginBottom: 24 }}
+          >
             Đăng ký
           </ButtonFilled>
         </View>
@@ -189,5 +224,13 @@ const styles = StyleSheet.create({
   textReset: {
     marginVertical: 24,
     textDecorationLine: "underline",
+  },
+  eyePassword: {
+    position: "absolute",
+    right: 2,
+    top: 38,
+    backgroundColor: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
 });
