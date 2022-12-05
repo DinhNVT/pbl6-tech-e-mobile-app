@@ -10,15 +10,18 @@ const postLogin = async (params) => {
   return await HandleApi.APIPost("auth/login/", params);
 };
 
+const postResetPassword = async (params) => {
+  return await HandleApi.APIPost("auth/resetpassword/", params);
+};
+
 const refreshToken = async () => {
+  console.log("refresh token");
   const token = await getTokenUser();
-  console.log(token.access)
   const access = await HandleApi.APIPost("auth/login/refresh/", {
     refresh: token.refresh,
   }).then((res) => {
     return res;
   });
-  console.log(access.access)
   const value = await AsyncStorage.getItem("@Login");
   if (value !== null) {
     const data = JSON.parse(value);
@@ -33,8 +36,11 @@ const refreshToken = async () => {
   }
 };
 
-const postLogout = async (params) => {
-  return await HandleApi.APIPostWithToken("auth/api/logout/", params);
+const postLogout = async () => {
+  const refreshToken = await getTokenUser();
+  return await HandleApi.APIPost("auth/logout/", {
+    refresh: refreshToken.refresh,
+  });
 };
 
 const saveDataLogin = async (data) => {
@@ -78,21 +84,20 @@ const clearDataLogin = async () => {
 };
 
 const isLogin = async () => {
-  console.log('islogin')
-    const token = await getTokenUser();
-    if (!!token) {
-      const tokenDecodedRefresh = jwt_decode(token.refresh);
-      const tokenDecodedAccess = jwt_decode(token.access);
-      if (tokenDecodedRefresh.exp < Math.floor(Date.now() / 1000)) {
-        AuthenticationService.clearDataLogin();
-        return false
-      } else if (tokenDecodedAccess.exp < Math.floor(Date.now() / 1000)) {
-        AuthenticationService.refreshToken();
-      }
-    } else {
-      return false
+  const token = await getTokenUser();
+  if (!!token) {
+    const tokenDecodedRefresh = jwt_decode(token.refresh);
+    const tokenDecodedAccess = jwt_decode(token.access);
+    if (tokenDecodedRefresh.exp < Math.floor(Date.now() / 1000)) {
+      AuthenticationService.clearDataLogin();
+      return false;
+    } else if (tokenDecodedAccess.exp < Math.floor(Date.now() / 1000)) {
+      AuthenticationService.refreshToken();
     }
-    return true
+  } else {
+    return false;
+  }
+  return true;
 };
 
 const AuthenticationService = {
@@ -105,6 +110,7 @@ const AuthenticationService = {
   postLogout,
   getDataUser,
   getTokenUser,
+  postResetPassword,
 };
 
 export default AuthenticationService;

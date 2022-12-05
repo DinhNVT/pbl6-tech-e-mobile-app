@@ -5,6 +5,7 @@ import CardProductItem from "../component/CardProductItem";
 import AppStyles from "../theme/AppStyles";
 
 const ListProductScreen = (props) => {
+  console.log(props.route.params)
   return (
     <View style={styles.container}>
       <Text style = {[AppStyles.FontStyle.headline_5, {color: AppStyles.ColorStyles.color.gray_700, marginLeft: 8}]}>Danh sách điện thoại</Text>

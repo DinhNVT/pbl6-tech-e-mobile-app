@@ -30,20 +30,27 @@ import { useIsFocused } from "@react-navigation/native";
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const LoginStack = ({ route }) => (
-  <Stack.Navigator
-    initialRouteName="LoginScreen"
-    screenOptions={{
-      // headerTitleStyle: styles.headerTitleStyle,
-      headerMode: "float",
-      headerShown: false,
-    }}
-  >
-    <Stack.Screen name="LoginScreen" component={LoginScreen} />
-    <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
-    <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-  </Stack.Navigator>
-);
+const LoginStack = ({ route }) => {
+  return (
+    <Stack.Navigator
+      initialRouteName={
+        route.params.name == "Login" ? "LoginScreen" : "SignUpScreen"
+      }
+      screenOptions={{
+        // headerTitleStyle: styles.headerTitleStyle,
+        headerMode: "float",
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="LoginScreen" component={LoginScreen} />
+      <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+      <Stack.Screen
+        name="ResetPasswordScreen"
+        component={ResetPasswordScreen}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const HomeStack = (props) => {
   const isFocused = useIsFocused();
@@ -163,7 +170,7 @@ const AppNavigation = () => {
     if (!!token) {
       const tokenDecodedRefresh = jwt_decode(token.refresh);
       const tokenDecodedAccess = jwt_decode(token.access);
-      if (tokenDecodedRefresh.exp < Math.floor(Date.now() / 1000)) {
+      if (tokenDecodedRefresh.exp - 7200 < Math.floor(Date.now() / 1000)) {
         AuthenticationService.clearDataLogin();
       } else if (tokenDecodedAccess.exp < Math.floor(Date.now() / 1000)) {
         AuthenticationService.refreshToken();

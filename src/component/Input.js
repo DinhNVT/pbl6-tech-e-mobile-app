@@ -1,13 +1,20 @@
-import React from 'react'
-import { TextInput, View, StyleSheet } from 'react-native'
+import React from "react";
+import { TextInput, View, StyleSheet } from "react-native";
 
-import AppStyles from '../theme/AppStyles'
+import AppStyles from "../theme/AppStyles";
 
 const Input = (props) => {
   return (
-    <TextInput {...props} style = {{...styles.input, ...props.style, ...AppStyles.FontStyle.subtitle_1}}/>
-  )
-}
+    <TextInput
+      {...props}
+      style={{
+        ...styles.input,
+        ...AppStyles.FontStyle.subtitle_1,
+        ...props.style,
+      }}
+    />
+  );
+};
 
 const styles = StyleSheet.create({
   input: {
@@ -17,8 +24,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 4,
     color: AppStyles.ColorStyles.color.gray_400,
-    paddingHorizontal: 8
-  }
-})
+    paddingHorizontal: 8,
+  },
+});
 
-export default Input
+export default Input;

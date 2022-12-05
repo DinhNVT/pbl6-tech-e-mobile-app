@@ -1,12 +1,6 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { React, useEffect, useState } from "react";
-import Logo from "../../assets/icons/Logo.png";
+import AvatarDefault from "../../assets/image/avatar_default.png";
 import AppStyles from "../theme/AppStyles";
 import ButtonFilled from "../component/ButtonFilled";
 import FeatherIcon from "react-native-vector-icons/Feather";
@@ -19,14 +13,20 @@ const ProfileScreen = (props) => {
   const date = Math.floor(Date.now() / 1000);
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
+  const [dataUser, setDataUser] = useState();
 
   const checkLogin = async () => {
+    if (await AuthenticationService.isLogin()) {
+      setDataUser(await AuthenticationService.getDataUser());
+    }
     setIsLogin(await AuthenticationService.isLogin());
   };
 
   const handleLogout = () => {
+    AuthenticationService.postLogout();
     AuthenticationService.clearDataLogin();
     checkLogin();
+    setDataUser(null);
   };
 
   const onLogout = () => {
@@ -65,16 +65,29 @@ const ProfileScreen = (props) => {
           </TouchableOpacity>
         </View>
       ) : null}
-      <View style={styles.imageContainer}>
-        <Image resizeMode="cover" style={styles.logo} source={Logo}></Image>
-      </View>
-      {isLogin ? (
+      {isLogin && !!dataUser ? (
+        <View style={styles.imageContainer}>
+          <Image
+            resizeMode="cover"
+            style={styles.logo}
+            source={AvatarDefault}
+          ></Image>
+        </View>
+      ) : null}
+      {isLogin && !!dataUser ? (
         <View style={styles.containerLogin}>
           <Text style={[AppStyles.FontStyle.headline_6, styles.fullName]}>
-            Nguyen Huu Dinh
+            {dataUser.first_name + " " + dataUser.last_name}
           </Text>
-          <Text style={styles.role}>Người bán</Text>
-          <ButtonFilled onPress={() => {}} style={styles.button}>
+          <Text style={styles.role}>
+            {dataUser.role == "USER" ? "Khách hàng" : "Người bán"}
+          </Text>
+          <ButtonFilled
+            onPress={() => {
+              console.log(dataUser);
+            }}
+            style={styles.button}
+          >
             Sửa hồ sơ
           </ButtonFilled>
           <ButtonFilled onPress={() => {}} style={styles.button}>
@@ -83,15 +96,25 @@ const ProfileScreen = (props) => {
         </View>
       ) : (
         <View style={styles.containerNotLogin}>
+          <View style={styles.circleBackGround}></View>
           <ButtonFilled
             onPress={() => {
-              props.navigation.navigate("LoginStack");
+              props.navigation.navigate("LoginStack", {
+                name: "Login",
+              });
             }}
             style={styles.button}
           >
             Đăng nhập
           </ButtonFilled>
-          <ButtonFilled onPress={() => {}} style={styles.button}>
+          <ButtonFilled
+            onPress={() => {
+              props.navigation.navigate("LoginStack", {
+                name: "SignUp",
+              });
+            }}
+            style={styles.button}
+          >
             Đăng ký
           </ButtonFilled>
         </View>
@@ -120,9 +143,9 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   logo: {
-    borderColor: AppStyles.ColorStyles.color.primary_normal,
+    borderColor: AppStyles.ColorStyles.color.primary_dark,
     borderRadius: 50,
-    borderWidth: 1,
+    borderWidth: 3,
     width: 100,
     height: 100,
   },
@@ -139,6 +162,15 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     width: "100%",
+    height: "100%",
+    justifyContent: "center",
+  },
+  circleBackGround: {
+    position: "absolute",
+    backgroundColor: AppStyles.ColorStyles.color.secondary_400,
+    width: 370,
+    height: 370,
+    borderRadius: 550
   },
   role: {
     backgroundColor: AppStyles.ColorStyles.color.primary_normal,

@@ -18,17 +18,29 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import AppStyles from "../theme/AppStyles";
 import MenuItem from "../component/MenuItem";
 import ProductService from "../config/service/ProductService";
+import Badge from "../component/Badge";
+
+//done
+//logout
+//login
+//reset password
+//register
+//validate
+//eye password
+//loading
+
+//process
 
 const HomeScreen = (props) => {
-  const getListProducts = () => {
-    ProductService.getListProducts().then(res => res)
-  }
-  useEffect(()=>{
-    getListProducts()
-  })
+  // const getListProducts = () => {
+  //   ProductService.getListProducts().then((res) => res);
+  // };
+  // useEffect(() => {
+  //   getListProducts();
+  // });
   const onSearch = () => {
-    props.navigation.navigate('SearchScreen')
-  }
+    props.navigation.navigate("SearchScreen");
+  };
   return (
     <ScrollView style={styles.container}>
       <ImageBackground
@@ -41,7 +53,11 @@ const HomeScreen = (props) => {
             <Image resizeMode="cover" style={styles.logo} source={Logo}></Image>
           </View>
           <InputSearch onSearch={onSearch} />
-          <TouchableOpacity onPress={() => {}} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={{ position: "relative" }}
+            onPress={() => {}}
+            activeOpacity={0.7}
+          >
             <Icon
               name="shopping-cart"
               size={20}
@@ -52,6 +68,7 @@ const HomeScreen = (props) => {
                 borderRadius: 6,
               }}
             />
+            <Badge></Badge>
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -59,7 +76,10 @@ const HomeScreen = (props) => {
         <View style={styles.menuTop}>
           <MenuItem
             onClick={() => {
-              props.navigation.navigate("ListProductScreen");
+              props.navigation.navigate("ListProductScreen", {
+                id: 1,
+                name: "Điện thoại",
+              });
             }}
             title={"Điện thoại"}
           >
@@ -69,7 +89,15 @@ const HomeScreen = (props) => {
               color={AppStyles.ColorStyles.color.primary_normal}
             />
           </MenuItem>
-          <MenuItem title={"Laptop"}>
+          <MenuItem
+            onClick={() => {
+              props.navigation.navigate("ListProductScreen", {
+                id: 2,
+                name: "Laptop",
+              });
+            }}
+            title={"Laptop"}
+          >
             <Icon
               name="laptop"
               size={20}
