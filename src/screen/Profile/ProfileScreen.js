@@ -10,6 +10,7 @@ import { ModalYesNo } from "../../component/Modals";
 import Loading from "../../component/Loading";
 import AccountService from "../../config/service/AccountService";
 import Config from "react-native-config";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const ProfileScreen = (props) => {
   const [isLogin, setIsLogin] = useState(false);
@@ -82,27 +83,36 @@ const ProfileScreen = (props) => {
       ) : null}
       {isLogin && !!dataUser ? (
         <View style={styles.imageContainer}>
-          <Image
-            resizeMode="cover"
-            style={styles.logo}
-            source={
-              !!dataUser.data.user_profile.avt
-                ? { uri: `${API_URL}${dataUser.data.user_profile.avt}` }
-                : AvatarDefault
-            }
-          ></Image>
-          {/* <TouchableOpacity
-            style={styles.iconEdit}
-            onPress={selectFile}
-            activeOpacity={0.9}
-          >
-            <Icon
-              name="border-color"
-              size={24}
-              color={"gray"}
-              style={styles.iconImg}
-            />
-          </TouchableOpacity> */}
+          <View>
+            <Image
+              resizeMode="cover"
+              style={styles.logo}
+              source={
+                !!dataUser.data.user_profile.avt
+                  ? { uri: `${API_URL}${dataUser.data.user_profile.avt}` }
+                  : AvatarDefault
+              }
+            ></Image>
+            <TouchableOpacity
+              style={styles.iconEdit}
+              onPress={() => {
+                props.navigation.navigate("ChangeAvtUserScreen", {
+                  avt: !!dataUser.data.user_profile.avt
+                    ? dataUser.data.user_profile.avt
+                    : null,
+                  id: dataUser.data.id
+                });
+              }}
+              activeOpacity={0.9}
+            >
+              <Icon
+                name="border-color"
+                size={24}
+                color={"gray"}
+                style={styles.iconImg}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       ) : null}
       {isLogin && !!dataUser ? (
@@ -181,6 +191,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     width: 100,
     height: 100,
+    position: "relative",
   },
   button: {
     marginVertical: 8,
@@ -216,5 +227,22 @@ const styles = StyleSheet.create({
   fullName: {
     color: AppStyles.ColorStyles.color.gray_700,
     fontWeight: "600",
+  },
+  iconEdit: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "white",
+    margin: 0,
+    padding: 0,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: AppStyles.ColorStyles.color.primary_normal,
+    width: 35,
+    height: 35,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 6,
   },
 });
