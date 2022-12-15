@@ -16,6 +16,7 @@ import ListProductScreen from "../screen/Products/ListProductScreen";
 import EditUserProfileScreen from "../screen/Profile/EditUserProfileScreen";
 import ChangePasswordScreen from "../screen/Profile/ChangePasswordScreen";
 import RegisterSellerScreen from "../screen/Profile/RegisterSellerScreen";
+import ChangeAvtUserScreen from "../screen/Profile/ChangeAvtUserScreen";
 
 import AppStyles from "../theme/AppStyles";
 import Icon from "react-native-vector-icons/FontAwesome5";
@@ -119,6 +120,15 @@ const ProfileStack = (props) => {
         }}
         name="ChangePasswordScreen"
         component={ChangePasswordScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Đổi ảnh đại diện",
+          headerTitleAlign: "center",
+        }}
+        name="ChangeAvtUserScreen"
+        component={ChangeAvtUserScreen}
       />
       <Stack.Screen
         options={{
@@ -256,6 +266,7 @@ const getTabBarVisibility = (route) => {
     "EditUserProfileScreen",
     "ChangePasswordScreen",
     "RegisterSellerScreen",
+    "ChangeAvtUserScreen",
   ];
   if (checkList.includes(routeName)) {
     return "none";

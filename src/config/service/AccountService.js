@@ -4,6 +4,10 @@ const getUserProfile = async (id) => {
   return await HandleApi.APIGetWithToken(`auth/profile/${id}/`);
 };
 
+const putChangeAvtUser = async (id, formData) => {
+  return await HandleApi.APIPutWithFormData(`auth/profile/${id}/upload-avt/`, formData);
+};
+
 const postRegisterSeller = async (formData) => {
   return await HandleApi.APIPostWithFormData('auth/seller/', formData);
 };
@@ -20,7 +24,8 @@ const AccountService = {
   getUserProfile,
   postRegisterSeller,
   getSellerProfile,
-  putSellerProfile
+  putSellerProfile,
+  putChangeAvtUser,
 };
 
 export default AccountService;
