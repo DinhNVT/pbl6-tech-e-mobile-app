@@ -16,19 +16,50 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import Dropdown from "../../component/Dropdown";
 import AccountService from "../../config/service/AccountService";
 import { useIsFocused } from "@react-navigation/native";
+import Loading from "../../component/Loading";
 
 const EditUserProfileScreen = (props) => {
   const dataUser = props.route.params.dataUser;
   const [openCal, setOpenCal] = useState(false);
   const [dataSeller, setDataSeller] = useState();
   const isFocused = useIsFocused();
+  const [inputData, setInputData] = useState({
+    email: !!dataUser.data ? dataUser.data.email : "",
+    emailPaypal:
+      !!dataUser.data && !!dataUser.data.user_profile.account_no
+        ? dataUser.data.user_profile.account_no
+        : "",
+    first_name: !!dataUser.data ? dataUser.data.first_name : "",
+    last_name: !!dataUser.data ? dataUser.data.last_name : "",
+    dayOfBirth:
+      !!dataUser.data && !!dataUser.data.user_profile.birthday
+        ? new Date(dataUser.data.user_profile.birthday.toString())
+        : new Date(),
+    gender: !!dataUser.data ? dataUser.data.user_profile.gender : null,
+    phoneNumber:
+      !!dataUser.data && !!dataUser.data.user_profile.phone
+        ? dataUser.data.user_profile.phone
+        : "",
+    address:
+      !!dataUser.data && !!dataUser.data.user_profile.address
+        ? dataUser.data.user_profile.address
+        : "",
+  });
+  const [errorInput, setErrorInput] = useState({
+    email: false,
+    emailPaypal: false,
+    error: false,
+    success: false,
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const setDate = (event, date) => {
     setOpenCal(!openCal);
     if (event.type == "set") {
-      console.log("set");
+      setInputData((prevInputData) => {
+        return { ...prevInputData, dayOfBirth: new Date(date) };
+      });
     }
-    console.log(event.nativeEvent, date);
   };
 
   const getDataSeller = () => {
@@ -47,10 +78,24 @@ const EditUserProfileScreen = (props) => {
     }
   }, [isFocused]);
 
+  var item = [
+    { id: 1, title: "--", value: null },
+    { id: 2, title: "Nam", value: true },
+    { id: 3, title: "Nữ", value: false },
+  ];
+
+  if (
+    !!dataUser.data &&
+    (dataUser.data.user_profile.gender != true ||
+      dataUser.data.user_profile.gender != false)
+  ) {
+    item.shift();
+  }
+
   useEffect(() => {
     props.navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity activeOpacity={0.8} onPress={() => {}}>
+        <TouchableOpacity activeOpacity={0.8} onPress={handleEditUserProfile}>
           <Text
             style={[
               AppStyles.FontStyle.button,
@@ -62,19 +107,98 @@ const EditUserProfileScreen = (props) => {
         </TouchableOpacity>
       ),
     });
-  }, [props.navigation]);
+  }, [props.navigation, inputData]);
 
-  const item = [
-    { id: 1, title: "--" },
-    { id: 2, title: "Nam" },
-    { id: 3, title: "Nữ" },
-  ];
   const handleChangeGender = (chooseId) => {
-    console.log(chooseId);
+    if (chooseId == 2) {
+      setInputData((prevInputData) => {
+        return { ...prevInputData, gender: true };
+      });
+    } else if (chooseId == 3) {
+      setInputData((prevInputData) => {
+        return { ...prevInputData, gender: false };
+      });
+    } else {
+      setInputData((prevInputData) => {
+        return { ...prevInputData, gender: null };
+      });
+    }
   };
+
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
+
+  const handleEditUserProfile = () => {
+    setErrorInput((prevErrorInput) => {
+      return { ...prevErrorInput, error: false, success: false };
+    });
+    var check = false;
+
+    if (!validateEmail(inputData.email)) {
+      check = true;
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, email: true };
+      });
+    } else {
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, email: false };
+      });
+    }
+
+    if (!!inputData.emailPaypal && !validateEmail(inputData.emailPaypal)) {
+      check = true;
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, emailPaypal: true };
+      });
+    } else {
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, emailPaypal: false };
+      });
+    }
+
+    if (!check) {
+      console.log(inputData);
+      setIsLoading(true);
+      AccountService.putEditUserProfile(dataUser.data.id, {
+        first_name: inputData.first_name,
+        last_name: inputData.last_name,
+        email: inputData.email,
+        user_profile: {
+          gender: inputData.gender,
+          birthday: inputData.dayOfBirth.toISOString().substring(0, 10),
+          phone: inputData.phoneNumber,
+          address: inputData.address,
+          account_no: inputData.emailPaypal,
+        },
+      }).then((res) => {
+        if (res.message == "Update Profile completed!") {
+          setErrorInput((prevErrorInput) => {
+            return { ...prevErrorInput, error: false, success: true };
+          });
+          setIsLoading(false);
+        } else {
+          setErrorInput((prevErrorInput) => {
+            return { ...prevErrorInput, error: true, success: false };
+          });
+          setIsLoading(false);
+        }
+      });
+    } else {
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, error: false, success: false };
+      });
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={{ alignItems: "center", width: "100%", marginVertical: 24 }}>
+        {isLoading && <Loading />}
         <ButtonOutlined
           onPress={() => {
             props.navigation.navigate("RegisterSellerScreen", {
@@ -97,6 +221,15 @@ const EditUserProfileScreen = (props) => {
         >
           Đổi mật khẩu
         </ButtonFilled>
+        {errorInput.success ? (
+          <Text style={[AppStyles.FontStyle.subtitle_1, styles.textSuccess]}>
+            Sửa thành công
+          </Text>
+        ) : errorInput.error ? (
+          <Text style={[AppStyles.FontStyle.subtitle_1, styles.textError]}>
+            Sửa không thành công
+          </Text>
+        ) : null}
         <View style={[styles.inputView, { marginTop: 24 }]}>
           <Text style={[AppStyles.FontStyle.body_2, styles.labelReadOnly]}>
             Username
@@ -110,60 +243,52 @@ const EditUserProfileScreen = (props) => {
           />
         </View>
         <View style={styles.inputView}>
-          <Text style={[AppStyles.FontStyle.body_2, styles.labelReadOnly]}>
-            Email
-          </Text>
+          <Text style={[AppStyles.FontStyle.body_2, styles.label]}>Email</Text>
           <Input
-            value={dataUser.data.email}
+            value={inputData.email}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, email: e });
+            }}
             placeholder="Nhập email"
-            style={styles.inputTextReadOnly}
-            editable={false}
-            placeholderTextColor={AppStyles.ColorStyles.color.gray_400}
+            style={styles.inputText}
           />
+          {errorInput.email ? (
+            <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
+              *Email sai
+            </Text>
+          ) : null}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>Họ*</Text>
           <Input
-            // value={inputData.first_name}
-            // onChangeText={(e) => {
-            //   setInputData({ ...inputData, first_name: e });
-            // }}
+            value={inputData.first_name}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, first_name: e });
+            }}
             placeholder="Nhập họ"
             style={styles.inputText}
           />
-          {/* {errorInput.first_name ? (
-          <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-            *họ không được trống và nhỏ hơn 30 ký tự
-          </Text>
-        ) : null} */}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>Tên*</Text>
           <Input
-            // value={inputData.first_name}
-            // onChangeText={(e) => {
-            //   setInputData({ ...inputData, first_name: e });
-            // }}
+            value={inputData.last_name}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, last_name: e });
+            }}
             placeholder="Nhập tên"
             style={styles.inputText}
           />
-          {/* {errorInput.first_name ? (
-          <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-            *họ không được trống và nhỏ hơn 30 ký tự
-          </Text>
-        ) : null} */}
         </View>
         <View style={[styles.inputView, { position: "relative" }]}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
             Ngày sinh
           </Text>
           <Input
-            // value={inputData.first_name}
-            // onChangeText={(e) => {
-            //   setInputData({ ...inputData, first_name: e });
-            // }}
+            value={inputData.dayOfBirth.toISOString().substring(0, 10)}
             placeholder="__/__/__"
             style={styles.inputText}
+            editable={false}
           />
           <TouchableOpacity
             onPress={() => {
@@ -178,17 +303,12 @@ const EditUserProfileScreen = (props) => {
             <DateTimePicker
               mode="date"
               display="spinner"
-              value={new Date()}
+              value={inputData.dayOfBirth}
               maximumDate={new Date()}
               textColor={AppStyles.ColorStyles.color.primary_normal}
               onChange={setDate}
             />
           ) : null}
-          {/* {errorInput.first_name ? (
-          <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-            *họ không được trống và nhỏ hơn 30 ký tự
-          </Text>
-        ) : null} */}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
@@ -198,48 +318,54 @@ const EditUserProfileScreen = (props) => {
             onChange={handleChangeGender}
             style={styles.genderDropdown}
             itemDropdown={item}
+            id={
+              inputData.gender == true ? 2 : inputData.gender == false ? 3 : 1
+            }
           />
-          {/* {errorInput.first_name ? (
-          <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-            *họ không được trống và nhỏ hơn 30 ký tự
-          </Text>
-        ) : null} */}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
             Số điện thoại
           </Text>
           <Input
-            // value={inputData.first_name}
-            // onChangeText={(e) => {
-            //   setInputData({ ...inputData, first_name: e });
-            // }}
+            value={inputData.phoneNumber}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, phoneNumber: e });
+            }}
             placeholder="Nhập số điện thoại"
             style={styles.inputText}
           />
-          {/* {errorInput.first_name ? (
-          <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-            *họ không được trống và nhỏ hơn 30 ký tự
-          </Text>
-        ) : null} */}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
             Địa chỉ
           </Text>
           <Input
-            // value={inputData.first_name}
-            // onChangeText={(e) => {
-            //   setInputData({ ...inputData, first_name: e });
-            // }}
+            value={inputData.address}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, address: e });
+            }}
             placeholder="Nhập địa chỉ"
             style={styles.inputText}
           />
-          {/* {errorInput.first_name ? (
-          <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-            *họ không được trống và nhỏ hơn 30 ký tự
+        </View>
+        <View style={styles.inputView}>
+          <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
+            Email Paypal
           </Text>
-        ) : null} */}
+          <Input
+            value={inputData.emailPaypal}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, emailPaypal: e });
+            }}
+            placeholder="Nhập email Paypal"
+            style={styles.inputText}
+          />
+          {errorInput.emailPaypal ? (
+            <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
+              *email sai
+            </Text>
+          ) : null}
         </View>
       </View>
     </ScrollView>
@@ -266,7 +392,6 @@ const styles = StyleSheet.create({
     width: "90%",
     marginHorizontal: 16,
     borderColor: AppStyles.ColorStyles.color.gray_400,
-    color: AppStyles.ColorStyles.color.gray_400,
   },
   inputView: {
     width: "100%",
@@ -296,5 +421,25 @@ const styles = StyleSheet.create({
   },
   genderDropdown: {
     width: "90%",
+  },
+  textSuccess: {
+    color: AppStyles.ColorStyles.color.success_400,
+    marginTop: 8,
+    width: "100%",
+    textAlign: "center",
+    marginLeft: 8,
+    marginBottom: 16,
+  },
+  textError: {
+    color: AppStyles.ColorStyles.color.error_400,
+    marginTop: 8,
+    width: "100%",
+    textAlign: "center",
+    marginLeft: 8,
+    marginBottom: 16,
+  },
+  textError: {
+    color: AppStyles.ColorStyles.color.error_400,
+    width: 325,
   },
 });

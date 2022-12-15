@@ -5,7 +5,7 @@ import AppStyles from "../theme/AppStyles";
 
 const Dropdown = (props) => {
   const [onClickDropdown, setOnClickDropdown] = useState(false);
-  const [chooseId, setChooseId] = useState(props.itemDropdown[0].id);
+  const [chooseId, setChooseId] = useState(props.id);
 
   return (
     <View style={{ ...styles.container, ...props.style }}>

@@ -123,7 +123,7 @@ const ListProductScreen = (props) => {
         >
           Danh sách {props.route.params.name}
         </Text>
-        <Dropdown onChange={handleSortProductByPrice} itemDropdown={item} />
+        <Dropdown onChange={handleSortProductByPrice} itemDropdown={item} id ={1}/>
       </View>
 
       {isLoading ? (
