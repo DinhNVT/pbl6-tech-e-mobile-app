@@ -58,6 +58,18 @@ async function APIPostWithToken(url, params) {
   }).then((response) => response.json());
 }
 
+async function APIPutWithToken(url, params) {
+  url = API_URL.toString() + url;
+  return fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: await getToken(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  }).then((response) => response.json());
+}
+
 async function APIPatchWithToken(url, params) {
   url = API_URL.toString() + url;
   return fetch(url, {
@@ -107,7 +119,8 @@ const HandleApi = {
   APIGetWithToken,
   APIPatchWithToken,
   APIPostWithFormData,
-  APIPutWithFormData
+  APIPutWithFormData,
+  APIPutWithToken
 };
 
 export default HandleApi;
