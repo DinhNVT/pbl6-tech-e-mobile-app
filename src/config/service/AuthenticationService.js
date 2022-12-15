@@ -14,8 +14,11 @@ const postResetPassword = async (params) => {
   return await HandleApi.APIPost("auth/resetpassword/", params);
 };
 
+const patchChangePassword = async (params) => {
+  return await HandleApi.APIPatchWithToken("auth/password/", params);
+};
+
 const refreshToken = async () => {
-  console.log("refresh token");
   const token = await getTokenUser();
   const access = await HandleApi.APIPost("auth/login/refresh/", {
     refresh: token.refresh,
@@ -111,6 +114,7 @@ const AuthenticationService = {
   getDataUser,
   getTokenUser,
   postResetPassword,
+  patchChangePassword
 };
 
 export default AuthenticationService;

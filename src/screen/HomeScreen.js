@@ -17,7 +17,6 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AppStyles from "../theme/AppStyles";
 import MenuItem from "../component/MenuItem";
-import ProductService from "../config/service/ProductService";
 import Badge from "../component/Badge";
 
 //done
@@ -32,12 +31,6 @@ import Badge from "../component/Badge";
 //process
 
 const HomeScreen = (props) => {
-  // const getListProducts = () => {
-  //   ProductService.getListProducts().then((res) => res);
-  // };
-  // useEffect(() => {
-  //   getListProducts();
-  // });
   const onSearch = () => {
     props.navigation.navigate("SearchScreen");
   };

@@ -1,25 +1,39 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { React, useEffect, useState } from "react";
-import AvatarDefault from "../../assets/image/avatar_default.png";
-import AppStyles from "../theme/AppStyles";
-import ButtonFilled from "../component/ButtonFilled";
+import AvatarDefault from "../../../assets/image/avatar_default.png";
+import AppStyles from "../../theme/AppStyles";
+import ButtonFilled from "../../component/ButtonFilled";
 import FeatherIcon from "react-native-vector-icons/Feather";
-import AuthenticationService from "../config/service/AuthenticationService";
+import AuthenticationService from "../../config/service/AuthenticationService";
 import { useIsFocused } from "@react-navigation/native";
-import { ModalYesNo } from "../component/Modals";
+import { ModalYesNo } from "../../component/Modals";
+import Loading from "../../component/Loading";
+import AccountService from "../../config/service/AccountService";
+import Config from "react-native-config";
 
 const ProfileScreen = (props) => {
   const [isLogin, setIsLogin] = useState(false);
-  const date = Math.floor(Date.now() / 1000);
+  // const date = Math.floor(Date.now() / 1000);
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
   const [dataUser, setDataUser] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const API_URL = new URL(Config.API_URL);
 
   const checkLogin = async () => {
+    setIsLoading(true);
     if (await AuthenticationService.isLogin()) {
-      setDataUser(await AuthenticationService.getDataUser());
+      const getDataUser = await AuthenticationService.getDataUser();
+      AccountService.getUserProfile(getDataUser.id).then((res) => {
+        if (!!res.data) {
+          setDataUser(res);
+        } else {
+          setDataUser(null);
+        }
+      });
     }
     setIsLogin(await AuthenticationService.isLogin());
+    setIsLoading(false);
   };
 
   const handleLogout = () => {
@@ -40,6 +54,7 @@ const ProfileScreen = (props) => {
 
   return (
     <View style={styles.container}>
+      {isLoading && <Loading />}
       {isLogin ? (
         <View>
           <ModalYesNo
@@ -70,21 +85,39 @@ const ProfileScreen = (props) => {
           <Image
             resizeMode="cover"
             style={styles.logo}
-            source={AvatarDefault}
+            source={
+              !!dataUser.data.user_profile.avt
+                ? { uri: `${API_URL}${dataUser.data.user_profile.avt}` }
+                : AvatarDefault
+            }
           ></Image>
+          {/* <TouchableOpacity
+            style={styles.iconEdit}
+            onPress={selectFile}
+            activeOpacity={0.9}
+          >
+            <Icon
+              name="border-color"
+              size={24}
+              color={"gray"}
+              style={styles.iconImg}
+            />
+          </TouchableOpacity> */}
         </View>
       ) : null}
       {isLogin && !!dataUser ? (
         <View style={styles.containerLogin}>
           <Text style={[AppStyles.FontStyle.headline_6, styles.fullName]}>
-            {dataUser.first_name + " " + dataUser.last_name}
+            {dataUser.data.first_name + " " + dataUser.data.last_name}
           </Text>
           <Text style={styles.role}>
-            {dataUser.role == "USER" ? "Khách hàng" : "Người bán"}
+            {dataUser.data.ROLE[1] == "SELLER" ? "Người bán" : "Khách hàng"}
           </Text>
           <ButtonFilled
             onPress={() => {
-              console.log(dataUser);
+              props.navigation.navigate("EditUserProfileScreen", {
+                dataUser: dataUser,
+              });
             }}
             style={styles.button}
           >
@@ -170,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.ColorStyles.color.secondary_400,
     width: 370,
     height: 370,
-    borderRadius: 550
+    borderRadius: 550,
   },
   role: {
     backgroundColor: AppStyles.ColorStyles.color.primary_normal,

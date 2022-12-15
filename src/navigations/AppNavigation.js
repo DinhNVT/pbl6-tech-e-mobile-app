@@ -9,10 +9,13 @@ import LoginScreen from "../screen/LoginScreen";
 import SignUpScreen from "../screen/SignUpScreen";
 import ResetPasswordScreen from "../screen/ResetPasswordScreen";
 import SearchScreen from "../screen/SearchScreen";
-import ProfileScreen from "../screen/ProfileScreen";
+import ProfileScreen from "../screen/Profile/ProfileScreen";
 import HomeScreen from "../screen/HomeScreen";
-import ProductDetailScreen from "../screen/ProductDetailScreen";
-import ListProductScreen from "../screen/ListProductScreen";
+import ProductDetailScreen from "../screen/Products/ProductDetailScreen";
+import ListProductScreen from "../screen/Products/ListProductScreen";
+import EditUserProfileScreen from "../screen/Profile/EditUserProfileScreen";
+import ChangePasswordScreen from "../screen/Profile/ChangePasswordScreen";
+import RegisterSellerScreen from "../screen/Profile/RegisterSellerScreen";
 
 import AppStyles from "../theme/AppStyles";
 import Icon from "react-native-vector-icons/FontAwesome5";
@@ -76,10 +79,55 @@ const HomeStack = (props) => {
       />
       <Stack.Screen
         options={{
-          headerShown: true,
+          headerShown: false,
         }}
         name="ListProductScreen"
         component={ListProductScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const ProfileStack = (props) => {
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    AuthenticationService.isLogin();
+  }, [props, isFocused]);
+  return (
+    <Stack.Navigator
+      initialRouteName="ProfileScreen"
+      screenOptions={{
+        headerMode: "float",
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Sửa hồ sơ",
+          headerTitleAlign: "center",
+        }}
+        name="EditUserProfileScreen"
+        component={EditUserProfileScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Đổi mật khẩu",
+          headerTitleAlign: "center",
+        }}
+        name="ChangePasswordScreen"
+        component={ChangePasswordScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Đăng ký bán hàng",
+          headerTitleAlign: "center",
+        }}
+        name="RegisterSellerScreen"
+        component={RegisterSellerScreen}
       />
     </Stack.Navigator>
   );
@@ -120,24 +168,26 @@ const TabStack = (props) => {
         component={HomeStack}
       />
       <Tab.Screen
-        options={{
+        options={({ route }) => ({
+          tabBarStyle: { display: getTabBarVisibility(route) },
           tabBarIcon: ({ color, size }) => (
             <Icon name="search" size={size} color={color} />
           ),
           title: "Tìm kiếm",
-        }}
+        })}
         name="SearchScreen"
         component={SearchScreen}
       />
       <Tab.Screen
-        options={{
+        options={({ route }) => ({
+          tabBarStyle: { display: getTabBarVisibility(route) },
           tabBarIcon: ({ color, size }) => (
             <Icon name="user-alt" size={size} color={color} />
           ),
           title: "Cá nhân",
-        }}
-        name="ProfileScreen"
-        component={ProfileScreen}
+        })}
+        name="ProfileStack"
+        component={ProfileStack}
       />
     </Tab.Navigator>
   );
@@ -200,7 +250,14 @@ export default AppNavigation;
 
 const getTabBarVisibility = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? "Feed";
-  if (routeName == "ProductDetailScreen" || routeName == "ListProductScreen") {
+  const checkList = [
+    "ProductDetailScreen",
+    "ListProductScreen",
+    "EditUserProfileScreen",
+    "ChangePasswordScreen",
+    "RegisterSellerScreen",
+  ];
+  if (checkList.includes(routeName)) {
     return "none";
   }
   return "flex";

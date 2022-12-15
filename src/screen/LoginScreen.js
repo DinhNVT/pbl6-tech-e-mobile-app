@@ -21,8 +21,8 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import Loading from "../component/Loading";
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("huudinh22122001");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("spyrke0");
+  const [password, setPassword] = useState("PBL6TechE");
   const [isLogin, setIsLogin] = useState(false);
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     color: AppStyles.ColorStyles.color.gray_400,
     paddingHorizontal: 8,
+    color: AppStyles.ColorStyles.color.gray_800
   },
 });
 

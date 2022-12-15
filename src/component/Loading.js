@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 999,
     top: 200,
+    left: "30%",
   },
   text: {
     marginTop: 8,

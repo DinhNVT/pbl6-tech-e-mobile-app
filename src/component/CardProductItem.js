@@ -9,24 +9,33 @@ import {
 import React from "react";
 
 import AppStyles from "../theme/AppStyles";
-import Icon from "react-native-vector-icons/FontAwesome5";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import Star from "./Star";
 
 const CardProductItem = (props) => {
   return (
-    <TouchableOpacity onPress={props.onPress} activeOpacity={0.8} style={styles.container}>
+    <TouchableOpacity
+      onPress={props.onPress}
+      activeOpacity={0.8}
+      style={{...styles.container, ...props.style}}
+    >
       <View style={styles.imageContainer}>
         <Image
           resizeMode="cover"
           style={styles.image}
-          source={require("../../assets/image/phone.png")}
+          source={{ uri: props.url }}
         ></Image>
-        <Text style={[styles.discount, AppStyles.FontStyle.caption]}>
-          Giảm 50%
+        <Text style={[AppStyles.FontStyle.caption, styles.discount]}>
+          Giảm giá {!props.discount ? "0" : props.discount}%
         </Text>
       </View>
       <View style={styles.contentContainer}>
-        <Text style={AppStyles.FontStyle.body_2}>Iphone 14 pro max 128Gb</Text>
+        <Text
+          numberOfLines={3}
+          style={[AppStyles.FontStyle.body_2, styles.textTitle]}
+        >
+          {props.title}
+        </Text>
         <View style={styles.price}>
           <Text
             style={[
@@ -37,7 +46,10 @@ const CardProductItem = (props) => {
               },
             ]}
           >
-            10.000.000đ
+            {props.originalPrice
+              .toString()
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ".") || ""}
+            đ
           </Text>
           <Text
             style={[
@@ -45,40 +57,12 @@ const CardProductItem = (props) => {
               { color: AppStyles.ColorStyles.color.gray_700 },
             ]}
           >
-            9.000.000đ
+            {props.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") || ""}
+            đ
           </Text>
         </View>
         <View style={styles.rateContainer}>
-          <FontAwesome
-            name="star"
-            size={15}
-            color={"yellow"}
-            style={{ marginRight: 4 }}
-          />
-          <FontAwesome
-            name="star-half-full"
-            size={15}
-            color={"yellow"}
-            style={{ marginRight: 4 }}
-          />
-          <FontAwesome
-            name="star-o"
-            size={15}
-            color={"yellow"}
-            style={{ marginRight: 4 }}
-          />
-          <FontAwesome
-            name="star-o"
-            size={15}
-            color={"yellow"}
-            style={{ marginRight: 4 }}
-          />
-          <FontAwesome
-            name="star-o"
-            size={15}
-            color={"yellow"}
-            style={{ marginRight: 4 }}
-          />
+          <Star a={props.a} />
         </View>
         <TouchableOpacity activeOpacity={0.7} style={styles.addToCart}>
           <FontAwesome name="cart-plus" size={20} color={"white"} style={{}} />
@@ -100,7 +84,7 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "white",
     marginHorizontal: 8,
-    marginVertical: 12
+    marginVertical: 12,
   },
   imageContainer: {
     width: "100%",
@@ -114,12 +98,12 @@ const styles = StyleSheet.create({
   },
   discount: {
     position: "absolute",
-    zIndex: 100,
-    backgroundColor: AppStyles.ColorStyles.color.secondary_400,
+    zIndex: 11,
     margin: 4,
     borderRadius: 4,
     padding: 2,
     color: "white",
+    backgroundColor: "#F294A190",
   },
   contentContainer: {
     width: "100%",
@@ -140,6 +124,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 4,
-    padding: 8
+    padding: 8,
+  },
+  textTitle: {
+    minHeight: 65,
   },
 });

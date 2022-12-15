@@ -22,16 +22,17 @@ export default Badge;
 const styles = StyleSheet.create({
   badge: {
     position: "absolute",
-    zIndex: 999,
+    zIndex: 10,
     backgroundColor: AppStyles.ColorStyles.color.primary_normal,
     borderRadius: 50,
     borderWidth: 1,
     borderColor: "white",
-    width: 20,
-    height: 20,
+    width: 23,
+    height: 23,
     textAlign: "center",
     top: -5,
     right: -5,
     alignItems: "center",
+    justifyContent: "center",
   },
 });
