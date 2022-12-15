@@ -4,16 +4,26 @@ const API_URL = new URL(Config.API_URL);
 
 async function getToken() {
   if (await AuthenticationService.isLogin()) {
-    let data = await AuthenticationService.getTokenUser()
+    let data = await AuthenticationService.getTokenUser();
     return "Bearer " + data.access;
   }
 }
 
-const header = {
-  Accept: "application/json",
-  "Content-Type": "application/json",
-  Authorization: "",
-};
+// const header = {
+//   Accept: "application/json",
+//   "Content-Type": "application/json",
+//   Authorization: "",
+// };
+
+function APIGet(url) {
+  url = API_URL.toString() + url;
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((response) => response.json());
+}
 
 function APIPost(url, params) {
   url = API_URL.toString() + url;
@@ -23,45 +33,63 @@ function APIPost(url, params) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(params),
-  }).then((response) => response.json())
+  }).then((response) => response.json());
 }
 
 async function APIGetWithToken(url) {
-  url = API_URL + url;
+  url = API_URL.toString() + url;
   return fetch(url, {
     method: "GET",
     headers: {
       Authorization: await getToken(),
     },
-  })
-    .then((response) => response.json());
+  }).then((response) => response.json());
 }
 
-function APIPostWithToken(url, params) {
-  url = REACT_APP_API_ENDPOINT + "api/v1/" + url;
+async function APIPostWithToken(url, params) {
+  url = API_URL.toString() + url;
   return fetch(url, {
     method: "POST",
     headers: {
-      Authorization: getToken(),
+      Authorization: await getToken(),
       "Content-Type": "application/json",
     },
     body: JSON.stringify(params),
-  })
-    .then(checkStatus)
-    .then((response) => response.text());
+  }).then((response) => response.json());
 }
 
-function APIPostWithFormData(url, body) {
-  url = REACT_APP_API_ENDPOINT + "api/v1/" + url;
+async function APIPatchWithToken(url, params) {
+  url = API_URL.toString() + url;
+  return fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: await getToken(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  }).then((response) => response.json());
+}
+
+async function APIPostWithFormData(url, body) {
+  url = url = API_URL.toString() + url;
   return fetch(url, {
     method: "POST",
     headers: {
-      Authorization: getToken(),
+      Authorization: await getToken(),
     },
     body: body,
-  })
-    .then(checkStatus)
-    .then((response) => response.text());
+  }).then((response) => response.json());
+}
+
+async function APIPutWithFormData(url, body) {
+  url = url = API_URL.toString() + url;
+  return fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: await getToken(),
+    },
+    body: body,
+  }).then((response) => response.json());
 }
 
 // function checkStatus(response) {
@@ -73,9 +101,13 @@ function APIPostWithFormData(url, body) {
 // }
 
 const HandleApi = {
+  APIGet,
   APIPost,
   APIPostWithToken,
   APIGetWithToken,
+  APIPatchWithToken,
+  APIPostWithFormData,
+  APIPutWithFormData
 };
 
 export default HandleApi;

@@ -12,6 +12,7 @@ import AppStyles from "../theme/AppStyles";
 import Logo from "../../assets/icons/Logo.png";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import InputSearch from "../component/InputSearch";
+import Badge from "../component/Badge";
 
 const SearchScreen = (props) => {
   const onSearch = () => {
@@ -36,6 +37,7 @@ const SearchScreen = (props) => {
               marginLeft: 8
             }}
           />
+          <Badge></Badge>
         </TouchableOpacity>
       </View>
       <Text
@@ -48,11 +50,7 @@ const SearchScreen = (props) => {
       </Text>
       <ScrollView>
         <View style={styles.content}>
-          <CardProductItem />
-          <CardProductItem />
-          <CardProductItem />
-          <CardProductItem />
-          <CardProductItem />
+          {/* <CardProductItem /> */}
         </View>
       </ScrollView>
     </View>

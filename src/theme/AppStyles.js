@@ -70,95 +70,109 @@ const ColorStyles = {
   fontSize: {
     title: 30,
     content: 20,
-    normal: 16
+    normal: 16,
   },
   buttonWidth: {
-    main: "70%"
+    main: "70%",
   },
   textInputWidth: {
-    main: "80%"
+    main: "80%",
   },
   borderRadius: {
     main: 25,
-    small: 5
-  }
+    small: 5,
+  },
 };
 
 const FontStyle = StyleSheet.create({
   subtitle_1: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 17,
-    letterSpacing: 0.15
+    letterSpacing: 0.15,
+    color: ColorStyles.color.gray_800,
   },
   subtitle_2: {
-    fontFamily: 'Nunito-Medium',
+    fontFamily: "Nunito-Medium",
     fontSize: 15,
-    letterSpacing: 0.1
+    letterSpacing: 0.1,
+    color: ColorStyles.color.gray_800,
   },
   body_1: {
-    fontFamily: 'Nunito-Medium',
+    fontFamily: "Nunito-Medium",
     fontSize: 17,
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
+    color: ColorStyles.color.gray_800,
   },
   body_2: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 15,
-    letterSpacing: 0.25
+    letterSpacing: 0.25,
+    color: ColorStyles.color.gray_800,
   },
   BUTTON: {
-    fontFamily: 'Nunito-SemiBold',
+    fontFamily: "Nunito-SemiBold",
     fontSize: 15,
     letterSpacing: 1.25,
-    textTransform: 'uppercase'
+    textTransform: "uppercase",
+    color: ColorStyles.color.gray_800,
   },
   button: {
-    fontFamily: 'Nunito-SemiBold',
+    fontFamily: "Nunito-SemiBold",
     fontSize: 15,
-    letterSpacing: 0.25
+    letterSpacing: 0.25,
+    color: ColorStyles.color.gray_800,
   },
   caption: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 13,
-    letterSpacing: 0.4
+    letterSpacing: 0.4,
+    color: ColorStyles.color.gray_800,
   },
   OVERLINE: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 10,
     letterSpacing: 1.5,
-    textTransform: 'uppercase'
+    textTransform: "uppercase",
+    color: ColorStyles.color.gray_800,
   },
   headline_1: {
-    fontFamily: 'Nunito-Light',
+    fontFamily: "Nunito-Light",
     fontSize: 101,
     letterSpacing: -1.5,
+    color: ColorStyles.color.gray_800,
   },
   headline_2: {
-    fontFamily: 'Nunito-Light',
+    fontFamily: "Nunito-Light",
     fontSize: 63,
     letterSpacing: -0.5,
+    color: ColorStyles.color.gray_800,
   },
   headline_3: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 36,
+    color: ColorStyles.color.gray_800,
   },
   headline_4: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 36,
     letterSpacing: 0.25,
+    color: ColorStyles.color.gray_800,
   },
   headline_5: {
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     fontSize: 25,
+    color: ColorStyles.color.gray_800,
   },
   headline_6: {
-    fontFamily: 'Nunito-Medium',
+    fontFamily: "Nunito-Medium",
     fontSize: 21,
     letterSpacing: 0.15,
+    color: ColorStyles.color.gray_800,
   },
-})
+});
 
 const AppStyles = {
   ColorStyles,
-  FontStyle
-}
-export default AppStyles
+  FontStyle,
+};
+export default AppStyles;

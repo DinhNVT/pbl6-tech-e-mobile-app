@@ -131,7 +131,7 @@ const SignUpScreen = (props) => {
         first_name: inputData.first_name,
         last_name: inputData.last_name,
         email: inputData.email,
-        userprofile: {
+        user_profile: {
           gender: null,
           dateOfBirth: null,
           phone: "",
@@ -160,13 +160,13 @@ const SignUpScreen = (props) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableWithoutFeedback
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
-        accessible={false}
-      >
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+      accessible={false}
+    >
+      <ScrollView style={styles.container}>
         <View
           style={{ alignItems: "center", width: "100%", marginVertical: 24 }}
         >
@@ -359,8 +359,8 @@ const SignUpScreen = (props) => {
             Đăng nhập
           </ButtonFilled>
         </View>
-      </TouchableWithoutFeedback>
-    </ScrollView>
+      </ScrollView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -424,11 +424,11 @@ const styles = StyleSheet.create({
   },
   textError: {
     color: AppStyles.ColorStyles.color.error_400,
-    width: 310,
+    width: 325,
   },
   textSuccess: {
     color: AppStyles.ColorStyles.color.success_400,
-    width: 310,
+    width: 325,
   },
   eyePassword: {
     position: "absolute",

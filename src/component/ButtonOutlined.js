@@ -8,7 +8,7 @@ const ButtonOutlined = (props) => {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={props.onPress}
-      style={{ ...props.style, ...styles.container }}
+      style={{ ...styles.container, ...props.style }}
     >
       <View {...props} style={{ ...styles.button }}>
         <Text style={[AppStyles.FontStyle.BUTTON, styles.buttonText]}>
