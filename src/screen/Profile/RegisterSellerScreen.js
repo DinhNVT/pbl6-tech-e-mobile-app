@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Keyboard,
 } from "react-native";
 import { React, useState, useEffect } from "react";
 
@@ -90,6 +91,7 @@ const RegisterSellerScreen = (props) => {
   };
 
   const handleRegisterSeller = async () => {
+    Keyboard.dismiss();
     setErrorInput((prevErrorInput) => {
       return { ...prevErrorInput, error: false, success: false };
     });
@@ -164,24 +166,32 @@ const RegisterSellerScreen = (props) => {
         }
       });
     } else if (!check && ROLE == "SELLER") {
-      console.log("seller")
-      // setIsLoading(true);
-      // var formData = new FormData();
-      // formData.append("name_store", inputData.nameShop);
-      // if (!!uriImageShop) {
-      //   formData.append(`logo`, {
-      //     name: uriImageShop.assets[0].fileName,
-      //     type: "image/jpg",
-      //     uri: uriImageShop.assets[0].uri,
-      //   });
-      // }
-      // formData.append("account_no", inputData.emailPaypal);
-      // formData.append("facebook", inputData.linkFB);
-      // AccountService.putSellerProfile(dataUser.data.id, formData).then(
-      //   (res) => {
-      //     console.log(res);
-      //   }
-      // );
+      setIsLoading(true);
+      var formData = new FormData();
+      formData.append("name_store", inputData.nameShop);
+      if (!!uriImageShop) {
+        formData.append(`logo`, {
+          name: uriImageShop.assets[0].fileName,
+          type: "image/jpg",
+          uri: uriImageShop.assets[0].uri,
+        });
+      }
+      formData.append("account_no", inputData.emailPaypal);
+      formData.append("facebook", inputData.linkFB);
+      AccountService.putSellerProfile(dataUser.data.id, formData).then((res) => {
+        if (res.message == "Seller updated is sucess!") {
+          setErrorInput((prevErrorInput) => {
+            return { ...prevErrorInput, success: true, error: false };
+          });
+          setIsLoading(false);
+        } else {
+          console.log(res.error);
+          setIsLoading(false);
+          setErrorInput((prevErrorInput) => {
+            return { ...prevErrorInput, error: true, success: false };
+          });
+        }
+      });
     } else {
       setErrorInput((prevErrorInput) => {
         return { ...prevErrorInput, error: false, success: false };
@@ -212,16 +222,20 @@ const RegisterSellerScreen = (props) => {
         {isLoading && <Loading />}
         {errorInput.success ? (
           <Text style={[AppStyles.FontStyle.subtitle_1, styles.textSuccess]}>
-            Đăng ký bán hàng thành công
+            {ROLE == "SELLER"
+              ? "Sửa thành công"
+              : "Đăng ký bán hàng thành công"}
           </Text>
         ) : errorInput.error ? (
           <Text style={[AppStyles.FontStyle.subtitle_1, styles.textError]}>
-            Đăng ký không thành công
+            {ROLE == "SELLER"
+              ? "Sửa không thành công"
+              : "Đăng ký không thành công"}
           </Text>
         ) : null}
         <View style={styles.imageContainer}>
           {(!uriImageShop && !!inputData.imgUrl) ||
-          (!!uriImageShop && !inputData.imgUrl) ? (
+          (!!uriImageShop) ? (
             <View>
               <Image
                 resizeMode="cover"

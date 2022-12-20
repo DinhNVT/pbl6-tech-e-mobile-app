@@ -1,4 +1,10 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Keyboard,
+} from "react-native";
 import { React, useState, useEffect } from "react";
 
 import Input from "../../component/Input";
@@ -44,6 +50,7 @@ const ChangePasswordScreen = (props) => {
   }, [inputData, props.navigation]);
 
   const handleRegister = async () => {
+    Keyboard.dismiss()
     setErrorInput((prevErrorInput) => {
       return { ...prevErrorInput, success: false };
     });

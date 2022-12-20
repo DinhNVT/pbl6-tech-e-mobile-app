@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
   FlatList,
   TouchableOpacity,
 } from "react-native";
@@ -71,8 +70,10 @@ const ListProductScreen = (props) => {
         a={item.rating_average}
         originalPrice={item.original_price}
         price={item.price}
-        url={item.img_products[1].link}
+        url={item.img_products.length > 0 ? item.img_products[0].link : ""}
         discount={item.discount_rate}
+        addToCart={true}
+        quantitySold={item.quantity_sold}
       />
     );
   };
@@ -123,15 +124,19 @@ const ListProductScreen = (props) => {
         >
           Danh sách {props.route.params.name}
         </Text>
-        <Dropdown onChange={handleSortProductByPrice} itemDropdown={item} id ={1}/>
+        <Dropdown
+          onChange={handleSortProductByPrice}
+          itemDropdown={item}
+          id={1}
+        />
       </View>
 
       {isLoading ? (
         <Loading />
-      ) : (
+      ) : !!products ? (
         <View style={styles.content}>
           <FlatList
-            data={products}
+            data={products.results}
             renderItem={ItemProduct}
             keyExtractor={(item) => item.id}
             key={(item) => item.id}
@@ -139,7 +144,7 @@ const ListProductScreen = (props) => {
             showsVerticalScrollIndicator={false}
           ></FlatList>
         </View>
-      )}
+      ) : null}
     </View>
   );
 };

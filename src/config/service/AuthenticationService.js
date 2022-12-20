@@ -11,7 +11,7 @@ const postLogin = async (params) => {
 };
 
 const postResetPassword = async (params) => {
-  return await HandleApi.APIPost("auth/resetpassword/", params);
+  return await HandleApi.APIPost("auth/password/", params);
 };
 
 const patchChangePassword = async (params) => {

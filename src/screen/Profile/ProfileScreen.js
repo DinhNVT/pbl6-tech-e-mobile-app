@@ -24,17 +24,21 @@ const ProfileScreen = (props) => {
   const checkLogin = async () => {
     setIsLoading(true);
     if (await AuthenticationService.isLogin()) {
+      setIsLogin(true);
       const getDataUser = await AuthenticationService.getDataUser();
       AccountService.getUserProfile(getDataUser.id).then((res) => {
         if (!!res.data) {
           setDataUser(res);
+          setIsLoading(false);
         } else {
-          setDataUser(null);
+          console.log("error");
+          setIsLoading(false)
         }
       });
+    } else {
+      setIsLogin(false);
+      setIsLoading(false)
     }
-    setIsLogin(await AuthenticationService.isLogin());
-    setIsLoading(false);
   };
 
   const handleLogout = () => {
@@ -51,7 +55,7 @@ const ProfileScreen = (props) => {
 
   useEffect(() => {
     checkLogin();
-  }, [isFocused, props]);
+  }, [isFocused, props.navigation]);
 
   return (
     <View style={styles.container}>
@@ -100,7 +104,7 @@ const ProfileScreen = (props) => {
                   avt: !!dataUser.data.user_profile.avt
                     ? dataUser.data.user_profile.avt
                     : null,
-                  id: dataUser.data.id
+                  id: dataUser.data.id,
                 });
               }}
               activeOpacity={0.9}
@@ -136,8 +140,20 @@ const ProfileScreen = (props) => {
           <ButtonFilled onPress={() => {}} style={styles.button}>
             Giỏ hàng
           </ButtonFilled>
+          {dataUser.data.ROLE[1] == "SELLER" && (
+            <ButtonFilled
+              onPress={() => {
+                props.navigation.navigate("MainShopScreen", {
+                  dataUser: dataUser,
+                });
+              }}
+              style={styles.button}
+            >
+              Quản lý cửa hàng
+            </ButtonFilled>
+          )}
         </View>
-      ) : (
+      ) : !isLogin && !dataUser ? (
         <View style={styles.containerNotLogin}>
           <View style={styles.circleBackGround}></View>
           <ButtonFilled
@@ -161,7 +177,7 @@ const ProfileScreen = (props) => {
             Đăng ký
           </ButtonFilled>
         </View>
-      )}
+      ) : null}
     </View>
   );
 };

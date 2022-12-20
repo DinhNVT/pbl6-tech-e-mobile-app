@@ -70,6 +70,18 @@ async function APIPutWithToken(url, params) {
   }).then((response) => response.json());
 }
 
+async function APIDeleteWithToken(url, params) {
+  url = API_URL.toString() + url;
+  return fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: await getToken(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  }).then((response) => response.json());
+}
+
 async function APIPatchWithToken(url, params) {
   url = API_URL.toString() + url;
   return fetch(url, {
@@ -120,7 +132,8 @@ const HandleApi = {
   APIPatchWithToken,
   APIPostWithFormData,
   APIPutWithFormData,
-  APIPutWithToken
+  APIPutWithToken,
+  APIDeleteWithToken
 };
 
 export default HandleApi;
