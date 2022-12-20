@@ -17,6 +17,11 @@ import EditUserProfileScreen from "../screen/Profile/EditUserProfileScreen";
 import ChangePasswordScreen from "../screen/Profile/ChangePasswordScreen";
 import RegisterSellerScreen from "../screen/Profile/RegisterSellerScreen";
 import ChangeAvtUserScreen from "../screen/Profile/ChangeAvtUserScreen";
+import MainShopScreen from "../screen/Shops/MainShopScreen";
+import AddProductScreen from "../screen/Shops/AddProductScreen";
+import AddImageProduct from "../screen/Shops/AddImageProduct";
+import AddProductChildScreen from "../screen/Shops/AddProductChildScreen";
+import AddProductVariantScreen from "../screen/Shops/AddProductVariantScreen";
 
 import AppStyles from "../theme/AppStyles";
 import Icon from "react-native-vector-icons/FontAwesome5";
@@ -138,6 +143,41 @@ const ProfileStack = (props) => {
         }}
         name="RegisterSellerScreen"
         component={RegisterSellerScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+        }}
+        name="MainShopScreen"
+        component={MainShopScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+        }}
+        name="AddProductScreen"
+        component={AddProductScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+        }}
+        name="AddImageProduct"
+        component={AddImageProduct}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+        }}
+        name="AddProductChildScreen"
+        component={AddProductChildScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+        }}
+        name="AddProductVariantScreen"
+        component={AddProductVariantScreen}
       />
     </Stack.Navigator>
   );
@@ -267,6 +307,11 @@ const getTabBarVisibility = (route) => {
     "ChangePasswordScreen",
     "RegisterSellerScreen",
     "ChangeAvtUserScreen",
+    "MainShopScreen",
+    "AddProductScreen",
+    "AddImageProduct",
+    "AddProductChildScreen",
+    "AddProductVariantScreen",
   ];
   if (checkList.includes(routeName)) {
     return "none";

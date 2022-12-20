@@ -4,6 +4,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Keyboard
 } from "react-native";
 import { React, useState, useEffect } from "react";
 
@@ -48,6 +49,7 @@ const EditUserProfileScreen = (props) => {
   const [errorInput, setErrorInput] = useState({
     email: false,
     emailPaypal: false,
+    phoneNumber: false,
     error: false,
     success: false,
   });
@@ -134,6 +136,7 @@ const EditUserProfileScreen = (props) => {
   };
 
   const handleEditUserProfile = () => {
+    Keyboard.dismiss()
     setErrorInput((prevErrorInput) => {
       return { ...prevErrorInput, error: false, success: false };
     });
@@ -147,6 +150,17 @@ const EditUserProfileScreen = (props) => {
     } else {
       setErrorInput((prevErrorInput) => {
         return { ...prevErrorInput, email: false };
+      });
+    }
+
+    if (inputData.phoneNumber.length > 10) {
+      check = true;
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, phoneNumber: true };
+      });
+    } else {
+      setErrorInput((prevErrorInput) => {
+        return { ...prevErrorInput, phoneNumber: false };
       });
     }
 
@@ -335,6 +349,11 @@ const EditUserProfileScreen = (props) => {
             placeholder="Nhập số điện thoại"
             style={styles.inputText}
           />
+          {errorInput.phoneNumber ? (
+            <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
+              *số điện thoại phải nhỏ hơn 10
+            </Text>
+          ) : null}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>

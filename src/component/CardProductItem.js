@@ -17,7 +17,7 @@ const CardProductItem = (props) => {
     <TouchableOpacity
       onPress={props.onPress}
       activeOpacity={0.8}
-      style={{...styles.container, ...props.style}}
+      style={{ ...styles.container, ...props.style }}
     >
       <View style={styles.imageContainer}>
         <Image
@@ -63,10 +63,38 @@ const CardProductItem = (props) => {
         </View>
         <View style={styles.rateContainer}>
           <Star a={props.a} />
+          <Text>{props.quantitySold} đã bán</Text>
         </View>
-        <TouchableOpacity activeOpacity={0.7} style={styles.addToCart}>
-          <FontAwesome name="cart-plus" size={20} color={"white"} style={{}} />
-        </TouchableOpacity>
+        {!!props.addToCart ? (
+          <TouchableOpacity activeOpacity={0.7} style={styles.addToCart}>
+            <FontAwesome
+              name="cart-plus"
+              size={20}
+              color={"white"}
+              style={{}}
+            />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.editCard}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.addToCart, styles.btnDelete]}
+              onPress={props.handleDelete}
+            >
+              <Text
+                style={{ color: AppStyles.ColorStyles.color.primary_normal }}
+              >
+                Xóa
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.addToCart, styles.btnEdit]}
+            >
+              <Text style={{ color: "white" }}>Sửa</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -128,5 +156,19 @@ const styles = StyleSheet.create({
   },
   textTitle: {
     minHeight: 65,
+  },
+  editCard: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  btnEdit: {
+    width: "45%",
+  },
+  btnDelete: {
+    width: "45%",
+    backgroundColor: "white",
+    borderColor: AppStyles.ColorStyles.color.primary_normal,
+    borderWidth: 1,
   },
 });
