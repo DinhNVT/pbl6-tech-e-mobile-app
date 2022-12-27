@@ -229,9 +229,7 @@ const EditChildProduct = (props) => {
                       ? { uri: inputData.thumbnailURL.assets[0].uri }
                       : !!productEdit
                       ? {
-                          uri: `${productEdit.thumbnail_url}${
-                            productEdit.thumbnail_url.includes("?") ? "&" : "?"
-                          }&time'${new Date().getTime()}`,
+                          uri: `${productEdit.thumbnail_url}`,
                         }
                       : addImage
                   }
@@ -407,9 +405,7 @@ const EditChildProduct = (props) => {
                     resizeMode="cover"
                     style={styles.imageView}
                     source={{
-                      uri: `${item.thumbnail_url}${
-                        item.thumbnail_url.includes("?") ? "&" : "?"
-                      }&time'${new Date().getTime()}`,
+                      uri: `${item.thumbnail_url}`,
                     }}
                   ></Image>
                 </View>

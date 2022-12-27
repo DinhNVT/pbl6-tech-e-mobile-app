@@ -16,12 +16,14 @@ import ButtonOutlined from "../../component/ButtonOutlined";
 import AuthenticationService from "../../config/service/AuthenticationService";
 import CartService from "../../config/service/CartService";
 import { useIsFocused } from "@react-navigation/native";
+import AccountService from "../../config/service/AccountService";
 
 const CartScreen = (props) => {
   const [isLogin, setIsLogin] = useState();
   const [dataCartItem, setDataCartItem] = useState([]);
   const [cartItemId, setCartItemId] = useState([]);
   const isFocused = useIsFocused();
+  const [users, setUsers] = useState(null);
 
   const checkLogin = async () => {
     setIsLogin(await AuthenticationService.isLogin());
@@ -32,10 +34,18 @@ const CartScreen = (props) => {
     }
   };
 
-  const getCartItem = () => {
+  const getCartItem = async () => {
     CartService.getCartItem().then((res) => {
       setDataCartItem(res.data);
       setCartItemId([]);
+    });
+    const userId = await AuthenticationService.getDataUser();
+    AccountService.getUserProfile(userId.id).then((res) => {
+      if (!!res?.data) {
+        setUsers(res.data);
+      } else {
+        console.log(res);
+      }
     });
   };
 
@@ -95,18 +105,22 @@ const CartScreen = (props) => {
   };
 
   const handleAddOrder = async () => {
-    // console.log(cartItemId);
     const idUser = await AuthenticationService.getDataUser();
-    // console.log(idUser.id);
-    if (cartItemId.length > 0) {
+    if (
+      cartItemId.length > 0 &&
+      !!users?.user_profile?.address &&
+      !!users?.user_profile?.phone
+    ) {
       props.navigation.navigate("OrderScreen", {
         dataCartItem: {
           userId: idUser.id,
           cartItemId: cartItemId,
         },
       });
-    } else {
+    } else if (cartItemId.length <= 0) {
       Alert.alert(`Không có sản phẩm nào được chọn`);
+    } else if (!users?.user_profile?.address && !users?.user_profile?.phone) {
+      Alert.alert(`Thông tin địa chỉ giao hàng không được trống`);
     }
   };
 
@@ -130,6 +144,48 @@ const CartScreen = (props) => {
     <View style={styles.container}>
       {isLogin ? (
         <ScrollView>
+          <View style={styles.addressContainer}>
+            <Text style={[AppStyles.FontStyle.subtitle_1]}>
+              Địa chỉ giao hàng
+            </Text>
+            <View style={{ display: "flex", flexDirection: "row" }}>
+              {!!users && (
+                <View
+                  style={{
+                    width: "85%",
+                    marginRight: 8,
+                    marginVertical: 8,
+                  }}
+                >
+                  <Text style={[AppStyles.FontStyle.body_2]}>
+                    Số điện thoại:{" "}
+                    {!!users.user_profile.phone
+                      ? users.user_profile.phone
+                      : "..............."}
+                  </Text>
+                  <Text style={[AppStyles.FontStyle.body_2]} numberOfLines={2}>
+                    Địa chỉ:{" "}
+                    {!!users.user_profile.address
+                      ? users.user_profile.address
+                      : "..............."}
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                activeOpacity={0.4}
+                onPress={() => {
+                  props.navigation.navigate("AddressStack");
+                }}
+              >
+                <Icon
+                  name={"square-edit-outline"}
+                  size={40}
+                  color={AppStyles.ColorStyles.color.gray_400}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
           <View style={styles.headerSelect}>
             <View style={styles.selectAll}>
               <TouchableOpacity
@@ -348,5 +404,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: "hidden",
     marginRight: 8,
+  },
+  addressContainer: {
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: AppStyles.ColorStyles.color.primary_normal,
+    marginVertical: 8,
   },
 });

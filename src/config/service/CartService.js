@@ -36,6 +36,17 @@ const putUpdateCartItem = async (id, params) => {
   return await HandleApi.APIPutWithToken(`cart-item/${id}/`, params);
 };
 
+const getHistoryPayout = async () => {
+  return await HandleApi.APIGetWithToken(`tech/pay-out/`);
+};
+
+const postGetPayout = async (params) => {
+  return await HandleApi.APIPostWithToken(
+    `tech/checkout-paypal/withdrawal/`,
+    params
+  );
+};
+
 const CartService = {
   getCartItem,
   postAddToCart,
@@ -46,6 +57,8 @@ const CartService = {
   postCreateOrder,
   deleteOrder,
   postCheckOut,
+  getHistoryPayout,
+  postGetPayout,
 };
 
 export default CartService;

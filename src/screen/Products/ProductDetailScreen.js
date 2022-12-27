@@ -52,6 +52,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
   const getProductDetail = async () => {
     setIsLoading(true);
+    console.log(route.params.id);
     const getProduct = await ProductService.getDetailProduct(route.params.id)
       .then((res) => {
         if (!!res.data) {
@@ -480,14 +481,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     ? {
                         uri: `${
                           product.img_products.find((p) => p.id == idImage).link
-                        }${
-                          product.img_products
-                            .find((p) => p.id == idImage)
-                            .link.toString()
-                            .includes("?")
-                            ? "&"
-                            : "?"
-                        }time'${new Date().getTime()}`,
+                        }`,
                       }
                     : { uri: "" }
                 }
@@ -528,9 +522,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                         ]}
                         resizeMode="cover"
                         source={{
-                          uri: `${item.link}${
-                            item.link.toString().includes("?") ? "&" : "?"
-                          }time'${new Date().getTime()}`,
+                          uri: `${item.link}`,
                         }}
                       ></Image>
                     </TouchableOpacity>
@@ -822,9 +814,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     ).toLocaleTimeString()} ${new Date(
                       item.time_interactive
                     ).toLocaleDateString()}`}
-                    uri={`${item.link}${
-                      item.link.toString().includes("?") ? "&" : "?"
-                    }time'${new Date().getTime()}`}
+                    uri={`${item.link}`}
                   ></ReviewItem>
                 ))}
               </View>

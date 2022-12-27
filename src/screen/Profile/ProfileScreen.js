@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { React, useEffect, useState } from "react";
 import AvatarDefault from "../../../assets/image/avatar_default.png";
 import AppStyles from "../../theme/AppStyles";
@@ -20,19 +27,26 @@ const ProfileScreen = (props) => {
   const [dataUser, setDataUser] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const API_URL = new URL(Config.API_URL);
+  const [historyUser, setHistoryUser] = useState([]);
 
   const checkLogin = async () => {
     setIsLoading(true);
     if (await AuthenticationService.isLogin()) {
       setIsLogin(true);
       const getDataUser = await AuthenticationService.getDataUser();
-      AccountService.getUserProfile(getDataUser.id).then((res) => {
+      await AccountService.getUserProfile(getDataUser.id).then((res) => {
         if (!!res.data) {
           setDataUser(res);
           setIsLoading(false);
         } else {
           console.log("error");
           setIsLoading(false);
+        }
+      });
+      await AccountService.getHistoryUser().then((res) => {
+        if (!!res.data) {
+          setHistoryUser(res.data);
+          // console.log(res)
         }
       });
     } else {
@@ -59,106 +73,7 @@ const ProfileScreen = (props) => {
 
   return (
     <View style={styles.container}>
-      {isLoading && <Loading />}
-      {isLogin ? (
-        <View>
-          <ModalYesNo
-            handleYes={onLogout}
-            handleNo={() => {
-              setModalVisible(false);
-            }}
-            modalVisible={modalVisible}
-            title={"Bạn có muốn đăng xuất không?"}
-          />
-          <TouchableOpacity
-            onPress={() => {
-              setModalVisible(true);
-            }}
-            activeOpacity={0.6}
-            style={styles.logOut}
-          >
-            <FeatherIcon
-              name="log-out"
-              color={AppStyles.ColorStyles.color.gray_700}
-              size={30}
-            />
-          </TouchableOpacity>
-        </View>
-      ) : null}
-      {isLogin && !!dataUser ? (
-        <View style={styles.imageContainer}>
-          <View>
-            <Image
-              resizeMode="cover"
-              style={styles.logo}
-              source={
-                !!dataUser.data.user_profile.avt
-                  ? { uri: `${API_URL}${dataUser.data.user_profile.avt}` }
-                  : AvatarDefault
-              }
-            ></Image>
-            <TouchableOpacity
-              style={styles.iconEdit}
-              onPress={() => {
-                props.navigation.navigate("ChangeAvtUserScreen", {
-                  avt: !!dataUser.data.user_profile.avt
-                    ? dataUser.data.user_profile.avt
-                    : null,
-                  id: dataUser.data.id,
-                });
-              }}
-              activeOpacity={0.9}
-            >
-              <Icon
-                name="border-color"
-                size={24}
-                color={"gray"}
-                style={styles.iconImg}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : null}
-      {isLogin && !!dataUser ? (
-        <View style={styles.containerLogin}>
-          <Text style={[AppStyles.FontStyle.headline_6, styles.fullName]}>
-            {dataUser.data.first_name + " " + dataUser.data.last_name}
-          </Text>
-          <Text style={styles.role}>
-            {dataUser.data.ROLE[1] == "SELLER" ? "Người bán" : "Khách hàng"}
-          </Text>
-          <ButtonFilled
-            onPress={() => {
-              props.navigation.navigate("EditUserProfileScreen", {
-                dataUser: dataUser,
-              });
-            }}
-            style={styles.button}
-          >
-            Sửa hồ sơ
-          </ButtonFilled>
-          <ButtonFilled
-            onPress={() => {
-              props.navigation.navigate("CartStack");
-            }}
-            style={styles.button}
-          >
-            Giỏ hàng
-          </ButtonFilled>
-          {dataUser.data.ROLE[1] == "SELLER" && (
-            <ButtonFilled
-              onPress={() => {
-                props.navigation.navigate("MainShopScreen", {
-                  dataUser: dataUser,
-                });
-              }}
-              style={styles.button}
-            >
-              Quản lý cửa hàng
-            </ButtonFilled>
-          )}
-        </View>
-      ) : !isLogin && !dataUser ? (
+      {!isLogin && !dataUser ? (
         <View style={styles.containerNotLogin}>
           <View style={styles.circleBackGround}></View>
           <ButtonFilled
@@ -183,6 +98,149 @@ const ProfileScreen = (props) => {
           </ButtonFilled>
         </View>
       ) : null}
+      <ScrollView>
+        {isLoading && <Loading />}
+        {isLogin ? (
+          <View>
+            <ModalYesNo
+              handleYes={onLogout}
+              handleNo={() => {
+                setModalVisible(false);
+              }}
+              modalVisible={modalVisible}
+              title={"Bạn có muốn đăng xuất không?"}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(true);
+              }}
+              activeOpacity={0.6}
+              style={styles.logOut}
+            >
+              <FeatherIcon
+                name="log-out"
+                color={AppStyles.ColorStyles.color.gray_700}
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+        ) : null}
+        {isLogin && !!dataUser ? (
+          <View style={styles.imageContainer}>
+            <View>
+              <Image
+                resizeMode="cover"
+                style={styles.logo}
+                source={
+                  !!dataUser.data.user_profile.avt
+                    ? { uri: `${API_URL}${dataUser.data.user_profile.avt}` }
+                    : AvatarDefault
+                }
+              ></Image>
+              <TouchableOpacity
+                style={styles.iconEdit}
+                onPress={() => {
+                  props.navigation.navigate("ChangeAvtUserScreen", {
+                    avt: !!dataUser.data.user_profile.avt
+                      ? dataUser.data.user_profile.avt
+                      : null,
+                    id: dataUser.data.id,
+                  });
+                }}
+                activeOpacity={0.9}
+              >
+                <Icon
+                  name="border-color"
+                  size={24}
+                  color={"gray"}
+                  style={styles.iconImg}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : null}
+        {isLogin && !!dataUser ? (
+          <View style={styles.containerLogin}>
+            <Text style={[AppStyles.FontStyle.headline_6, styles.fullName]}>
+              {dataUser.data.first_name + " " + dataUser.data.last_name}
+            </Text>
+            <Text style={styles.role}>
+              {dataUser.data.ROLE[1] == "SELLER" ? "Người bán" : "Khách hàng"}
+            </Text>
+            <ButtonFilled
+              onPress={() => {
+                props.navigation.navigate("EditUserProfileScreen", {
+                  dataUser: dataUser,
+                });
+              }}
+              style={styles.button}
+            >
+              Sửa hồ sơ
+            </ButtonFilled>
+            <ButtonFilled
+              onPress={() => {
+                props.navigation.navigate("CartStack");
+              }}
+              style={styles.button}
+            >
+              Giỏ hàng
+            </ButtonFilled>
+            {dataUser.data.ROLE[1] == "SELLER" && (
+              <ButtonFilled
+                onPress={() => {
+                  props.navigation.navigate("MainShopScreen", {
+                    dataUser: dataUser,
+                  });
+                }}
+                style={styles.button}
+              >
+                Quản lý cửa hàng
+              </ButtonFilled>
+            )}
+          </View>
+        ) : null}
+        {isLogin ? (
+          <View
+            style={{
+              padding: 8,
+              borderTopColor: AppStyles.ColorStyles.color.gray_200,
+              borderTopWidth: 1,
+              marginTop: 8,
+            }}
+          >
+            <Text style={[AppStyles.FontStyle.headline_6]}>
+              Lịch sử mua hàng
+            </Text>
+            {historyUser.length > 0 ? (
+              historyUser.map((item) => (
+                <View
+                  style={{
+                    borderBottomColor: AppStyles.ColorStyles.color.gray_200,
+                    borderBottomWidth: 1,
+                    padding: 8,
+                    marginBottom: 8,
+                  }}
+                >
+                  <Text style={[AppStyles.FontStyle.subtitle_1]}>
+                    {item.seller.name_store}
+                  </Text>
+                  <Text>{item.product.name}</Text>
+                  <Text>Số lượng: {item.quantity}</Text>
+                  <Text>
+                    Tổng:{" "}
+                    {item.total_price
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ".") || ""}
+                    đ
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text>Không có đơn hàng nào</Text>
+            )}
+          </View>
+        ) : null}
+      </ScrollView>
     </View>
   );
 };

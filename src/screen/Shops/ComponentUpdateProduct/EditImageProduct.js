@@ -234,9 +234,7 @@ const EditImageProduct = (props) => {
                   source={{
                     uri: !!!item.link
                       ? item.source.assets[0].uri
-                      : `${item.link}${
-                          item.link.includes("?") ? "&" : "?"
-                        }&time'${new Date().getTime()}`,
+                      : `${item.link}`,
                   }}
                 ></Image>
 

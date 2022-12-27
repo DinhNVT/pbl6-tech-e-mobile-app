@@ -27,6 +27,8 @@ import CartScreen from "../screen/Cart/CartScreen";
 import ViewProductScreen from "../screen/Shops/ViewProductScreen";
 import OrderScreen from "../screen/Cart/OrderScreen";
 import ReviewProductScreen from "../screen/Products/ReviewProductScreen";
+import MainAddressScreen from "../screen/Address/MainAddressScreen";
+import PayOutScreen from "../screen/Shops/PayOutScreen";
 
 import AppStyles from "../theme/AppStyles";
 import Icon from "react-native-vector-icons/FontAwesome5";
@@ -206,6 +208,14 @@ const ProfileStack = (props) => {
         name="ViewProductScreen"
         component={ViewProductScreen}
       />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: 'Thông tin tài khoản'
+        }}
+        name="PayOutScreen"
+        component={PayOutScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -240,6 +250,32 @@ const CartStack = (props) => {
         }}
         name="OrderScreen"
         component={OrderScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const AddressStack = (props) => {
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    AuthenticationService.isLogin();
+  }, [props, isFocused]);
+  return (
+    <Stack.Navigator
+      initialRouteName="MainAddressScreen"
+      screenOptions={{
+        headerMode: "float",
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Chỉnh sửa thông tin",
+          headerTitleAlign: "center",
+        }}
+        name="MainAddressScreen"
+        component={MainAddressScreen}
       />
     </Stack.Navigator>
   );
@@ -322,6 +358,7 @@ const RootNavigator = (props) => {
       <Stack.Screen name="LoginStack" component={LoginStack} />
       <Stack.Screen name="TabStack" component={TabStack} />
       <Stack.Screen name="CartStack" component={CartStack} />
+      <Stack.Screen name="AddressStack" component={AddressStack} />
     </Stack.Navigator>
   );
 };
@@ -378,6 +415,7 @@ const getTabBarVisibility = (route) => {
     "AddProductVariantScreen",
     "MainUpdateProduct",
     "ReviewProductScreen",
+    "PayOutScreen"
   ];
   if (checkList.includes(routeName)) {
     return "none";
