@@ -54,13 +54,7 @@ const SearchScreen = (props) => {
         a={item.rating_average}
         originalPrice={item.original_price}
         price={item.price}
-        url={
-          item.img_products.length > 0
-            ? `${item.img_products[0].link}${
-                item.img_products[0].link.toString().includes("?") ? "&" : "?"
-              }time'${new Date().getTime()}`
-            : ""
-        }
+        url={item.img_products.length > 0 ? `${item.img_products[0].link}` : ""}
         discount={item.discount_rate}
         addToCart={true}
         quantitySold={item.quantity_sold}

@@ -31,6 +31,7 @@ const ListProductScreen = (props) => {
       if (!!res) {
         setProducts(res);
         setIsLoading(false);
+        // console.log(res)
       }
       setIsLoading(false);
     });
@@ -66,8 +67,8 @@ const ListProductScreen = (props) => {
   };
 
   const handlePaging = (status) => {
-    const indexPageNext = products.next.indexOf("page");
-    const indexPagePre = products.previous.indexOf("page");
+    const indexPageNext = products?.next?.indexOf("page");
+    const indexPagePre = products?.previous?.indexOf("page");
     if (status == "next" && !!products.next && indexPageNext > 0) {
       setParamsPage(
         products.next.substring(indexPageNext + 5, indexPageNext + 7)
@@ -94,13 +95,7 @@ const ListProductScreen = (props) => {
         a={item.rating_average}
         originalPrice={item.original_price}
         price={item.price}
-        url={
-          item.img_products.length > 0
-            ? `${item.img_products[0].link}${
-                item.img_products[0].link.toString().includes("?") ? "&" : "?"
-              }time'${new Date().getTime()}`
-            : ""
-        }
+        url={item.img_products.length > 0 ? `${item.img_products[0].link}` : ""}
         discount={item.discount_rate}
         addToCart={true}
         quantitySold={item.quantity_sold}
@@ -195,7 +190,7 @@ const ListProductScreen = (props) => {
                 activeOpacity={!products.previous ? 1 : 0.5}
               >
                 <MIcon
-                  name="arrow-left-drop-circle-outline"
+                  name="chevron-left"
                   size={42}
                   color={
                     !products.previous
@@ -212,7 +207,7 @@ const ListProductScreen = (props) => {
                 activeOpacity={!products.next ? 1 : 0.5}
               >
                 <MIcon
-                  name="arrow-right-drop-circle-outline"
+                  name="chevron-right"
                   size={42}
                   color={
                     !products.next

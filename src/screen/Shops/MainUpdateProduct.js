@@ -88,9 +88,7 @@ const MainUpdateProduct = (props) => {
                 source={
                   product.img_products.length > 0
                     ? {
-                        uri: `${product.img_products[0].link}${
-                          product.img_products[0].link.includes("?") ? "&" : "?"
-                        }&time'${new Date().getTime()}`,
+                        uri: `${product.img_products[0].link}`,
                         cache: "reload",
                       }
                     : productIMG

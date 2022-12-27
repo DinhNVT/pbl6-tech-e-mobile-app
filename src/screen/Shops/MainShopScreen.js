@@ -14,19 +14,23 @@ import CardProductItem from "../../component/CardProductItem";
 import Loading from "../../component/Loading";
 import { useIsFocused } from "@react-navigation/native";
 import ProductService from "../../config/service/ProductService";
+import MIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const MainShopScreen = (props) => {
   const { dataUser } = props.route.params;
   const [products, setProducts] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const isFocused = useIsFocused();
+  const [paramsPage, setParamsPage] = useState(1);
 
   const getProduct = () => {
     setIsLoading(true);
-    ProductService.getProductByIdSeller(dataUser.data.id).then((res) => {
-      setProducts(res);
-      setIsLoading(false);
-    });
+    ProductService.getProductByIdSeller(dataUser.data.id, paramsPage).then(
+      (res) => {
+        setProducts(res);
+        setIsLoading(false);
+      }
+    );
   };
 
   useEffect(() => {
@@ -44,11 +48,20 @@ const MainShopScreen = (props) => {
                 />
               </TouchableOpacity>
             ) : undefined}
-            <InputSearch
-              onSearch={() => {
-                console.log("search");
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: AppStyles.ColorStyles.color.primary_normal,
+                borderRadius: 4,
+                padding: 6,
               }}
-            ></InputSearch>
+              onPress={() => {
+                props.navigation.navigate("PayOutScreen");
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ color: "white" }}>Tài khoản</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.addStyle}
               onPress={() => {
@@ -64,7 +77,23 @@ const MainShopScreen = (props) => {
         );
       },
     });
-  }, [isFocused, props.navigation]);
+  }, [isFocused, props.navigation, paramsPage]);
+
+  const handlePaging = (status) => {
+    const indexPageNext = products?.next?.indexOf("page");
+    const indexPagePre = products?.previous?.indexOf("page");
+    if (status == "next" && !!products.next && indexPageNext > 0) {
+      setParamsPage(
+        products.next.substring(indexPageNext + 5, indexPageNext + 7)
+      );
+    } else if (status == "pre" && !!products.previous && indexPagePre > 0) {
+      setParamsPage(
+        products.previous.substring(indexPagePre + 5, indexPagePre + 7)
+      );
+    } else {
+      setParamsPage(1);
+    }
+  };
 
   const handleDeleteProduct = (id) => {
     ProductService.deleteProduct(id).then((res) => {
@@ -94,13 +123,7 @@ const MainShopScreen = (props) => {
         a={item.rating_average}
         originalPrice={item.original_price}
         price={item.price}
-        url={
-          item.img_products.length > 0
-            ? `${item.img_products[0].link}${
-                item.img_products[0].link.toString().includes("?") ? "&" : "?"
-              }time'${new Date().getTime()}`
-            : ""
-        }
+        url={item.img_products.length > 0 ? `${item.img_products[0].link}` : ""}
         discount={item.discount_rate}
         addToCart={false}
         quantitySold={item.quantity_sold}
@@ -119,7 +142,12 @@ const MainShopScreen = (props) => {
       {isLoading ? (
         <Loading />
       ) : !!products && !!products.results && products.results.length > 0 ? (
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            { paddingBottom: !products.previous && !products.next ? 0 : 48 },
+          ]}
+        >
           <FlatList
             data={products.results}
             renderItem={ItemProduct}
@@ -128,6 +156,51 @@ const MainShopScreen = (props) => {
             numColumns={2}
             showsVerticalScrollIndicator={false}
           ></FlatList>
+          {!products.previous && !products.next ? null : (
+            <View
+              style={{
+                marginHorizontal: 8,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  handlePaging("pre");
+                }}
+                activeOpacity={!products.previous ? 1 : 0.5}
+              >
+                <MIcon
+                  name="chevron-left"
+                  size={42}
+                  color={
+                    !products.previous
+                      ? AppStyles.ColorStyles.color.gray_400
+                      : AppStyles.ColorStyles.color.primary_normal
+                  }
+                  style={{ padding: 0, margin: 0 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  handlePaging("next");
+                }}
+                activeOpacity={!products.next ? 1 : 0.5}
+              >
+                <MIcon
+                  name="chevron-right"
+                  size={42}
+                  color={
+                    !products.next
+                      ? AppStyles.ColorStyles.color.gray_400
+                      : AppStyles.ColorStyles.color.primary_normal
+                  }
+                  style={{ padding: 0, margin: 0 }}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       ) : (
         <View style={styles.notProduct}>
@@ -148,6 +221,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    position: "relative",
   },
   headerStyle: {
     height: 50,
@@ -169,5 +243,8 @@ const styles = StyleSheet.create({
     height: "100%",
     display: "flex",
     justifyContent: "center",
+  },
+  content: {
+    flex: 1,
   },
 });

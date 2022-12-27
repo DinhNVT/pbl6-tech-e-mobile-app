@@ -339,7 +339,7 @@ const SignUpScreen = (props) => {
                 },
               ]}
             >
-              Đăng ký thành công hay kiểm tra gmail
+              Đăng ký thành công hãy kiểm tra gmail
             </Text>
           ) : null}
           <Text

@@ -10,8 +10,8 @@ import { LogBox } from 'react-native';
 const App = () => {
   useEffect(() => {
     SplashScreen.hide();
-    // LogBox.ignoreLogs(['Warning: ...']);
-    // LogBox.ignoreAllLogs();
+    LogBox.ignoreLogs(['Warning: ...']);
+    LogBox.ignoreAllLogs();
   });
   return (
     <Provider store={store}>

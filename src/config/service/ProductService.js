@@ -12,8 +12,10 @@ const getDetailProduct = async (id) => {
   return await HandleApi.APIGet(`product/${id}/`);
 };
 
-const getProductByIdSeller = async (id) => {
-  return await HandleApi.APIGetWithToken(`product-list/?seller=${id}`);
+const getProductByIdSeller = async (id, page) => {
+  return await HandleApi.APIGetWithToken(
+    `product-list/?seller=${id}&page=${page}`
+  );
 };
 
 const getListCategory = async () => {

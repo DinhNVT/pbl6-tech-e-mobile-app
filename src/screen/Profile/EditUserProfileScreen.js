@@ -186,7 +186,6 @@ const EditUserProfileScreen = (props) => {
           gender: inputData.gender,
           birthday: inputData.dayOfBirth.toISOString().substring(0, 10),
           phone: inputData.phoneNumber,
-          address: inputData.address,
           account_no: inputData.emailPaypal,
         },
       }).then((res) => {
@@ -353,7 +352,12 @@ const EditUserProfileScreen = (props) => {
             </Text>
           ) : null}
         </View>
-        <View style={styles.inputView}>
+        <TouchableOpacity
+          onPress={() => {
+            props.navigation.navigate("AddressStack");
+          }}
+          style={styles.inputView}
+        >
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
             Địa chỉ
           </Text>
@@ -364,8 +368,9 @@ const EditUserProfileScreen = (props) => {
             }}
             placeholder="Nhập địa chỉ"
             style={styles.inputText}
+            editable={false}
           />
-        </View>
+        </TouchableOpacity>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
             Email Paypal

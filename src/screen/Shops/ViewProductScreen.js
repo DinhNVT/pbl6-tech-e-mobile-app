@@ -122,14 +122,7 @@ const ViewProductScreen = ({ navigation, route }) => {
                     ? {
                         uri: `${
                           product.img_products.find((p) => p.id == idImage).link
-                        }${
-                          product.img_products
-                            .find((p) => p.id == idImage)
-                            .link.toString()
-                            .includes("?")
-                            ? "&"
-                            : "?"
-                        }time'${new Date().getTime()}`,
+                        }`,
                       }
                     : { uri: "" }
                 }
@@ -171,9 +164,7 @@ const ViewProductScreen = ({ navigation, route }) => {
                           ]}
                           resizeMode="cover"
                           source={{
-                            uri: `${item.link}${
-                              item.link.toString().includes("?") ? "&" : "?"
-                            }time'${new Date().getTime()}`,
+                            uri: `${item.link}`,
                           }}
                         ></Image>
                       </TouchableOpacity>
@@ -366,11 +357,7 @@ const ViewProductScreen = ({ navigation, route }) => {
                       resizeMode="cover"
                       style={styles.childItemIMG}
                       source={{
-                        uri: `${item.thumbnail_url}${
-                          item.thumbnail_url.toString().includes("?")
-                            ? "&"
-                            : "?"
-                        }time'${new Date().getTime()}`,
+                        uri: `${item.thumbnail_url}`,
                       }}
                     ></Image>
                   </View>
@@ -402,7 +389,7 @@ const ViewProductScreen = ({ navigation, route }) => {
                 </View>
                 {reviews.map((item) => (
                   <ReviewItem
-                    name={item.user}
+                    name={item.user.name}
                     content={item.comment}
                     a={item.rating}
                     date={`${new Date(
@@ -410,9 +397,7 @@ const ViewProductScreen = ({ navigation, route }) => {
                     ).toLocaleTimeString()} ${new Date(
                       item.time_interactive
                     ).toLocaleDateString()}`}
-                    uri={`${item.link}${
-                      item.link.toString().includes("?") ? "&" : "?"
-                    }time'${new Date().getTime()}`}
+                    uri={`${item.link}`}
                   ></ReviewItem>
                 ))}
               </View>

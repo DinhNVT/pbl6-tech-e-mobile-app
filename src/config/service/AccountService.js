@@ -9,15 +9,22 @@ const putEditUserProfile = async (id, params) => {
 };
 
 const putChangeAvtUser = async (id, formData) => {
-  return await HandleApi.APIPutWithFormData(`auth/profile/${id}/upload-avt/`, formData);
+  return await HandleApi.APIPutWithFormData(
+    `auth/profile/${id}/upload-avt/`,
+    formData
+  );
 };
 
 const postRegisterSeller = async (formData) => {
-  return await HandleApi.APIPostWithFormData('auth/seller/', formData);
+  return await HandleApi.APIPostWithFormData("auth/seller/", formData);
 };
 
 const getSellerProfile = async (id) => {
   return await HandleApi.APIGet(`auth/seller/${id}/`);
+};
+
+const getHistoryUser = async () => {
+  return await HandleApi.APIGetWithToken(`tech/purchased/`);
 };
 
 const putSellerProfile = async (id, formData) => {
@@ -31,6 +38,7 @@ const AccountService = {
   putSellerProfile,
   putChangeAvtUser,
   putEditUserProfile,
+  getHistoryUser,
 };
 
 export default AccountService;

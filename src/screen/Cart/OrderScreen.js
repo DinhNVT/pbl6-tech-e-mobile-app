@@ -18,6 +18,7 @@ import product from "../../../assets/image/product.png";
 import ButtonOutlined from "../../component/ButtonOutlined";
 import AuthenticationService from "../../config/service/AuthenticationService";
 import CartService from "../../config/service/CartService";
+import Config from "react-native-config";
 
 const OrderScreen = (props) => {
   const { dataCartItem } = props.route.params;
@@ -27,6 +28,7 @@ const OrderScreen = (props) => {
   const [paypalUri, setPaypalUri] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [statusCheckout, setStatusCheckout] = useState("NONE");
+  const API_URL = new URL(Config.API_URL);
 
   const createOrders = () => {
     if (dataCartItem.cartItemId.length > 0) {
@@ -116,13 +118,10 @@ const OrderScreen = (props) => {
   };
 
   const onChangeState = (webState) => {
-    if (
-      webState.url.includes("http://192.168.1.11:8000/") &&
-      webState.url.includes("succeeded")
-    ) {
+    if (webState.url.includes(API_URL) && webState.url.includes("succeeded")) {
       handleDeleteOrderSuccess("success");
     } else if (
-      webState.url.includes("http://192.168.1.11:8000/") &&
+      webState.url.includes(API_URL) &&
       webState.url.includes("failed")
     ) {
       handleDeleteOrderSuccess("failed");
@@ -135,11 +134,12 @@ const OrderScreen = (props) => {
         {!!paypalUri && statusCheckout == "NONE" ? (
           <View style={styles.centeredView}>
             <TouchableOpacity
+              style={{margin: 12, marginLeft: 18}}
               onPress={() => {
                 setModalVisible(!modalVisible);
               }}
             >
-              <Text>close</Text>
+              <Text>Hủy</Text>
             </TouchableOpacity>
             <WebView
               source={{
