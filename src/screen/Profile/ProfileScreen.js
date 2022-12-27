@@ -32,12 +32,12 @@ const ProfileScreen = (props) => {
           setIsLoading(false);
         } else {
           console.log("error");
-          setIsLoading(false)
+          setIsLoading(false);
         }
       });
     } else {
       setIsLogin(false);
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
 
@@ -137,7 +137,12 @@ const ProfileScreen = (props) => {
           >
             Sửa hồ sơ
           </ButtonFilled>
-          <ButtonFilled onPress={() => {}} style={styles.button}>
+          <ButtonFilled
+            onPress={() => {
+              props.navigation.navigate("CartStack");
+            }}
+            style={styles.button}
+          >
             Giỏ hàng
           </ButtonFilled>
           {dataUser.data.ROLE[1] == "SELLER" && (

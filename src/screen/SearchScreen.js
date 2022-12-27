@@ -5,27 +5,86 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import CardProductItem from "../component/CardProductItem";
 import AppStyles from "../theme/AppStyles";
 import Logo from "../../assets/icons/Logo.png";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import InputSearch from "../component/InputSearch";
 import Badge from "../component/Badge";
+import ProductService from "../config/service/ProductService";
+import { useIsFocused } from "@react-navigation/native";
 
 const SearchScreen = (props) => {
+  const { keyword } = props.route.params;
+  const [keywordNew, setKeywordNew] = useState("");
+  const [products, setProducts] = useState();
+  const isFocused = useIsFocused();
+
   const onSearch = () => {
-    props.navigation.navigate("SearchScreen");
+    ProductService.getListProducts(
+      `search=${!!keywordNew ? keywordNew : ""}`
+    ).then((res) => {
+      if (!!res) {
+        setProducts(res);
+        // console.log(res);
+      }
+    });
   };
+
+  useEffect(() => {
+    if (!!keyword) {
+      setKeywordNew(keyword);
+    }
+    onSearch();
+  }, [isFocused, props.navigation]);
+
+  const ItemProduct = ({ item }) => {
+    return (
+      <CardProductItem
+        key={item.id}
+        onPress={() => {
+          props.navigation.navigate("ProductDetailScreen", {
+            id: item.id,
+          });
+        }}
+        title={item.name}
+        a={item.rating_average}
+        originalPrice={item.original_price}
+        price={item.price}
+        url={
+          item.img_products.length > 0
+            ? `${item.img_products[0].link}${
+                item.img_products[0].link.toString().includes("?") ? "&" : "?"
+              }time'${new Date().getTime()}`
+            : ""
+        }
+        discount={item.discount_rate}
+        addToCart={true}
+        quantitySold={item.quantity_sold}
+      />
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.logoView}>
           <Image resizeMode="cover" style={styles.logo} source={Logo}></Image>
         </View>
-        <InputSearch onSearch={onSearch} />
-        <TouchableOpacity onPress={() => {}} activeOpacity={0.7}>
+        <InputSearch
+          onSearch={onSearch}
+          value={keywordNew}
+          onChangeText={setKeywordNew}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            props.navigation.navigate("CartStack");
+          }}
+          activeOpacity={0.7}
+        >
           <Icon
             name="shopping-cart"
             size={20}
@@ -34,10 +93,10 @@ const SearchScreen = (props) => {
               backgroundColor: AppStyles.ColorStyles.color.secondary_400,
               padding: 8,
               borderRadius: 6,
-              marginLeft: 8
+              marginLeft: 8,
             }}
           />
-          <Badge></Badge>
+          {/* <Badge></Badge> */}
         </TouchableOpacity>
       </View>
       <Text
@@ -46,13 +105,29 @@ const SearchScreen = (props) => {
           { color: AppStyles.ColorStyles.color.gray_700, marginLeft: 8 },
         ]}
       >
-        Kết quá tìm kiếm "iphone"
+        Kết quả tìm kiếm "{!!keywordNew ? keywordNew : ""}"
       </Text>
-      <ScrollView>
+      {!!products && products.results.length > 0 ? (
         <View style={styles.content}>
-          {/* <CardProductItem /> */}
+          <FlatList
+            data={products.results}
+            renderItem={ItemProduct}
+            keyExtractor={(item) => item.id}
+            key={(item) => item.id}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+          ></FlatList>
         </View>
-      </ScrollView>
+      ) : (
+        <Text
+          style={[
+            AppStyles.FontStyle.headline_6,
+            { width: "100%", textAlign: "center", marginTop: 32 },
+          ]}
+        >
+          Không tìm thấy sản phẩm
+        </Text>
+      )}
     </View>
   );
 };
@@ -62,11 +137,11 @@ export default SearchScreen;
 const styles = StyleSheet.create({
   container: {
     display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    // flexWrap: "wrap",
+    // justifyContent: "space-between",
     backgroundColor: "white",
     flex: 1,
-    width: '100%'
+    width: "100%",
   },
   content: {
     display: "flex",
@@ -90,6 +165,6 @@ const styles = StyleSheet.create({
   logoView: {
     width: 35,
     height: 24,
-    marginRight: 8
+    marginRight: 8,
   },
 });

@@ -9,21 +9,21 @@ import {
 import { React, useEffect, useState } from "react";
 
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import AppStyles from "../../theme/AppStyles";
-import Loading from "../../component/Loading";
+import AppStyles from "../../../theme/AppStyles";
+import Loading from "../../../component/Loading";
 import { useIsFocused } from "@react-navigation/native";
-import ProductService from "../../config/service/ProductService";
+import ProductService from "../../../config/service/ProductService";
 import { launchImageLibrary } from "react-native-image-picker";
-import Input from "../../component/Input";
-import addImage from "../../../assets/image/product.png";
-import ButtonOutlined from "../../component/ButtonOutlined";
-import Dropdown from "../../component/Dropdown";
+import Input from "../../../component/Input";
+import addImage from "../../../../assets/image/product.png";
+import ButtonOutlined from "../../../component/ButtonOutlined";
+import Dropdown from "../../../component/Dropdown";
 
-const AddProductVariantScreen = (props) => {
-  const { id, userId, childProducts } = props.route.params;
-  // console.log(id, userId, childProducts);
+const EditVariantProduct = (props) => {
+  const { idUser, product } = props;
+  // console.log(idUser, product );
 
-  const [childProduct, setChildProduct] = useState([]);
+  const [childProduct, setChildProduct] = useState(product.product_childs);
   const [status, setStatus] = useState("NO");
   const [input, setInput] = useState({
     value: "",
@@ -35,71 +35,86 @@ const AddProductVariantScreen = (props) => {
   const [childIdVariant, setChildIdVariant] = useState(null);
   const [variantColorItem, setVariantColorItem] = useState([]);
   const [variantMemoryItem, setVariantMemoryItem] = useState([]);
-
-  const handleDeleteProduct = () => {
-    ProductService.deleteProduct(id).then((res) => {
-      if (res.message == "Product deleted is success!") {
-        props.navigation.goBack();
-      }
-    });
-  };
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    var itemDropdown = [];
-    if (childProducts.length > 0) {
-      childProducts.map((item) => {
-        itemDropdown.push({
-          id: item.id,
-          title: item.name,
-        });
+    if (
+      product.product_variants.length > 0 &&
+      !!product.product_variants.find((item) => item.name == "Màu") &&
+      count == 0
+    ) {
+      setVariantColorItem(
+        product.product_variants.find((item) => item.name == "Màu").options
+      );
+      setCount(count + 1);
+    }
+    if (
+      product.product_variants.length > 0 &&
+      !!product.product_variants.find((item) => item.name == "Dung lượng") &&
+      count == 0
+    ) {
+      setVariantMemoryItem(
+        product.product_variants.find((item) => item.name == "Dung lượng")
+          .options
+      );
+      setCount(count + 1);
+    }
+    var itemDropdownC = [];
+    var itemDropdownV = [];
+    if (childProduct.length > 0) {
+      childProduct.map((item) => {
+        if (
+          product.product_variants.length > 0 &&
+          !!product.product_variants.find((item) => item.name == "Màu") &&
+          !!!product.product_variants
+            .find((item) => item.name == "Màu")
+            .options.find((variant) => variant.product_child == item.id)
+        ) {
+          itemDropdownC.push({
+            id: item.id,
+            title: item.name,
+          });
+        }
+        if (
+          product.product_variants.length > 0 &&
+          !!product.product_variants.find(
+            (item) => item.name == "Dung lượng"
+          ) &&
+          !!!product.product_variants
+            .find((item) => item.name == "Dung lượng")
+            .options.find((variant) => variant.product_child == item.id)
+        ) {
+          itemDropdownV.push({
+            id: item.id,
+            title: item.name,
+          });
+        }
+        if (
+          !!!product.product_variants.find((item) => item.name == "Dung lượng")
+        ) {
+          itemDropdownV.push({
+            id: item.id,
+            title: item.name,
+          });
+        }
+        if (!!!product.product_variants.find((item) => item.name == "Màu")) {
+          itemDropdownC.push({
+            id: item.id,
+            title: item.name,
+          });
+        }
       });
       if (itemDropdownColor.length > 0 && childIdColor == null)
-        setChildIdColor(itemDropdown[0].id);
+        setChildIdColor(itemDropdownC[0].id);
       if (itemDropdownVariant.length > 0 && childIdVariant == null)
-        setChildIdVariant(itemDropdown[0].id);
-      setChildProduct(childProducts);
-      if (variantColorItem.length == 0) setItemDropdownColor(itemDropdown);
-      if (variantMemoryItem.length == 0) setItemDropdownVariant(itemDropdown);
+        setChildIdVariant(itemDropdownV[0].id);
+      if (count == 0) {
+        setItemDropdownColor(itemDropdownC);
+        setItemDropdownVariant(itemDropdownV);
+        setCount(count + 1);
+      }
     }
-    props.navigation.setOptions({
-      header: ({ navigation, back }) => {
-        return (
-          <View style={styles.headerStyle}>
-            <View style={styles.headerLeft}>
-              <Text
-                style={[AppStyles.FontStyle.headline_6, { marginLeft: 20 }]}
-              >
-                Thêm lựa chọn
-              </Text>
-            </View>
-            <View style={styles.headerRight}>
-              <TouchableOpacity
-                style={styles.btnCancel}
-                activeOpacity={0.7}
-                onPress={handleDeleteProduct}
-              >
-                <Text
-                  style={[
-                    { color: AppStyles.ColorStyles.color.primary_normal },
-                  ]}
-                >
-                  Hủy
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.btnNext}
-                onPress={handleDoneAddProduct}
-                activeOpacity={0.7}
-              >
-                <Text style={[{ color: "white" }]}>Xong</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        );
-      },
-    });
   }, [
-    props.navigation,
     input,
     variantColorItem,
     variantMemoryItem,
@@ -108,29 +123,161 @@ const AddProductVariantScreen = (props) => {
     status,
   ]);
 
-  const handleDoneAddProduct = () => {
-    if (variantColorItem.length > 0) {
-      ProductService.postAddProductVariant({
+  const handleDoneAddProduct = async () => {
+    const checkColor =
+      product.product_variants.length > 0 &&
+      !!product.product_variants.find((item) => item.name == "Màu");
+    const checkMemory =
+      product.product_variants.length > 0 &&
+      !!product.product_variants.find((item) => item.name == "Dung lượng");
+
+    if (checkColor) {
+      const idVariantColor = product.product_variants.find(
+        (item) => item.name == "Màu"
+      ).id;
+      const arrUpdate = variantColorItem.filter((itemVariant) => {
+        return product.product_variants
+          .find((item) => item.name == "Màu")
+          .options.find(
+            (itemO) => itemO.product_child == itemVariant.product_child
+          );
+      });
+      if (arrUpdate.length > 0) {
+        await ProductService.putUpdateProductVariant(
+          product.product_variants.find((item) => item.name == "Màu").id,
+          {
+            options: variantColorItem,
+            name: "Màu",
+            product: product.id,
+          }
+        ).then((res) => {
+          if (res.message == "Update ProductVariants is Success!") {
+          }
+          // console.log(res, "u");
+        });
+      }
+      const arrAdd = variantColorItem.filter((itemVariant) => {
+        return !product.product_variants
+          .find((item) => item.name == "Màu")
+          .options.find(
+            (itemO) => itemO.product_child == itemVariant.product_child
+          );
+      });
+      if (arrAdd.length > 0) {
+        await arrAdd.map((item) => {
+          ProductService.postAddProductVariantOption({
+            value: item.value,
+            product_variant: idVariantColor,
+            product_child: item.product_child,
+          }).then((res) => {
+            console.log(res);
+          });
+        });
+      }
+
+      const arrIdDelete = product.product_variants
+        .find((item) => item.name == "Màu")
+        .options.filter((itemOption) => {
+          return !variantColorItem.find(
+            (itemCheckVariant) =>
+              itemCheckVariant.product_child == itemOption.product_child
+          );
+        });
+
+      if (arrIdDelete.length > 0) {
+        await arrIdDelete.map((item) => {
+          ProductService.deleteProductVariantOption(item.id).then((res) => {
+            console.log(res);
+          });
+        });
+      }
+    }
+    if (checkMemory) {
+      const idVariantMemory = product.product_variants.find(
+        (item) => item.name == "Dung lượng"
+      ).id;
+      const arrUpdate = variantMemoryItem.filter((itemVariant) => {
+        return product.product_variants
+          .find((item) => item.name == "Dung lượng")
+          .options.find(
+            (itemO) => itemO.product_child == itemVariant.product_child
+          );
+      });
+      if (arrUpdate.length > 0) {
+        await ProductService.putUpdateProductVariant(
+          product.product_variants.find((item) => item.name == "Dung lượng").id,
+          {
+            options: variantColorItem,
+            name: "Dung lượng",
+            product: product.id,
+          }
+        ).then((res) => {
+          if (res.message == "Update ProductVariants is Success!") {
+          }
+        });
+      }
+
+      const arrAdd = variantMemoryItem.filter((itemVariant) => {
+        return !product.product_variants
+          .find((item) => item.name == "Dung lượng")
+          .options.find(
+            (itemO) => itemO.product_child == itemVariant.product_child
+          );
+      });
+      if (arrAdd.length > 0) {
+        await arrAdd.map((item) => {
+          ProductService.postAddProductVariantOption({
+            value: item.value,
+            product_variant: idVariantMemory,
+            product_child: item.product_child,
+          }).then((res) => {
+            console.log(res);
+          });
+        });
+      }
+
+      const arrIdDelete = product.product_variants
+        .find((item) => item.name == "Dung lượng")
+        .options.filter((itemOption) => {
+          return !variantMemoryItem.find(
+            (itemCheckVariant) =>
+              itemCheckVariant.product_child == itemOption.product_child
+          );
+        });
+
+      if (arrIdDelete.length > 0) {
+        await arrIdDelete.map((item) => {
+          ProductService.deleteProductVariantOption(item.id).then((res) => {
+            console.log(res);
+          });
+        });
+      }
+    }
+
+    if (variantColorItem.length > 0 && !checkColor) {
+      await ProductService.postAddProductVariant({
         options: variantColorItem,
         name: "Màu",
-        product: id,
+        product: product.id,
       }).then((res) => {
         if (res.message == "Create Product Variant is Success!") {
-          if ((variantMemoryItem.length = 0)) props.navigation.goBack();
         }
+        console.log(res);
       });
     }
-    if (variantMemoryItem.length > 0) {
-      ProductService.postAddProductVariant({
+    if (variantMemoryItem.length > 0 && !checkMemory) {
+      await ProductService.postAddProductVariant({
         options: variantMemoryItem,
         name: "Dung lượng",
-        product: id,
+        product: product.id,
       }).then((res) => {
         if (res.message == "Create Product Variant is Success!") {
-          props.navigation.goBack();
+          console.log("ok");
         }
+        console.log(res);
       });
     }
+    props.onCancel()
   };
 
   const onChangeDropdown = (chooseId) => {
@@ -238,6 +385,39 @@ const AddProductVariantScreen = (props) => {
     <View style={styles.container}>
       {status == "NO" ? (
         <ScrollView>
+          <View
+            style={[
+              styles.editCardNew,
+              {
+                borderBottomColor: "gray",
+                borderBottomWidth: 1,
+                marginBottom: 16,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.addToCartNew, styles.btnDeleteNew]}
+              onPress={props.onCancel}
+            >
+              <Text
+                style={{
+                  color: AppStyles.ColorStyles.color.primary_normal,
+                }}
+              >
+                Quay lại
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                handleDoneAddProduct();
+              }}
+              activeOpacity={0.7}
+              style={[styles.addToCartNew, styles.btnEditNew]}
+            >
+              <Text style={{ color: "white" }}>Lưu</Text>
+            </TouchableOpacity>
+          </View>
           <View style={{ width: "100%" }}>
             <View style={styles.btnContainer}>
               <TouchableOpacity
@@ -454,7 +634,7 @@ const AddProductVariantScreen = (props) => {
   );
 };
 
-export default AddProductVariantScreen;
+export default EditVariantProduct;
 
 const styles = StyleSheet.create({
   container: {
@@ -589,6 +769,45 @@ const styles = StyleSheet.create({
     margin: 8,
   },
   btnEdit: {
+    width: "45%",
+  },
+  addToCartNew: {
+    backgroundColor: AppStyles.ColorStyles.color.primary_normal,
+    marginTop: 8,
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    padding: 8,
+  },
+  editCardNew: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    // paddingHorizontal: 24,
+  },
+  btnDeleteNew: {
+    width: "45%",
+    backgroundColor: "white",
+    borderColor: AppStyles.ColorStyles.color.primary_normal,
+    borderWidth: 1,
+  },
+  addToCartNew: {
+    backgroundColor: AppStyles.ColorStyles.color.primary_normal,
+    // marginTop: 8,
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    padding: 8,
+    width: "100%",
+    marginHorizontal: 0,
+    marginBottom: 8,
+  },
+  btnEditNew: {
     width: "45%",
   },
 });

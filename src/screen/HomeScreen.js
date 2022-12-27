@@ -7,33 +7,78 @@ import {
   ScrollView,
   TouchableOpacity,
   Keyboard,
+  FlatList,
 } from "react-native";
-import { React, useEffect } from "react";
+import { React, useEffect, useState } from "react";
 
 import InputSearch from "../component/InputSearch";
 import background_event from "../../assets/image/backgroud_event.png";
 import Logo from "../../assets/icons/Logo.png";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import MIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import AppStyles from "../theme/AppStyles";
 import MenuItem from "../component/MenuItem";
 import Badge from "../component/Badge";
-
-//done
-//logout
-//login
-//reset password
-//register
-//validate
-//eye password
-//loading
-
-//process
+import CardProductItem from "../component/CardProductItem";
+import ProductService from "../config/service/ProductService";
+import { useIsFocused } from "@react-navigation/native";
 
 const HomeScreen = (props) => {
-  const onSearch = () => {
-    props.navigation.navigate("SearchScreen");
+  const [products, setProducts] = useState();
+  const [keyword, setKeyword] = useState("");
+  const isFocused = useIsFocused();
+
+  const getListProducts = (params) => {
+    ProductService.getListHOTProducts().then((res) => {
+      if (!!res) {
+        setProducts(res);
+      }
+    });
   };
+
+  useEffect(() => {
+    getListProducts();
+  }, []);
+
+  useEffect(()=>{
+    setKeyword("")
+  }, [isFocused, props.navigation])
+
+  const onSearch = () => {
+    if (!!keyword)
+      props.navigation.navigate("SearchScreen", {
+        keyword: keyword
+      });
+  };
+
+  const ItemProduct = ({ item }) => {
+    return (
+      <CardProductItem
+        key={item.id}
+        onPress={() => {
+          props.navigation.navigate("ProductDetailScreen", {
+            id: item.id,
+          });
+        }}
+        title={item.name}
+        a={item.rating_average}
+        originalPrice={item.original_price}
+        price={item.price}
+        url={
+          item.img_products.length > 0
+            ? `${item.img_products[0].link}${
+                item.img_products[0].link.toString().includes("?") ? "&" : "?"
+              }time'${new Date().getTime()}`
+            : ""
+        }
+        discount={item.discount_rate}
+        addToCart={true}
+        quantitySold={item.quantity_sold}
+      />
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <ImageBackground
@@ -45,10 +90,16 @@ const HomeScreen = (props) => {
           <View style={styles.logoView}>
             <Image resizeMode="cover" style={styles.logo} source={Logo}></Image>
           </View>
-          <InputSearch onSearch={onSearch} />
+          <InputSearch
+            value={keyword}
+            onChangeText={setKeyword}
+            onSearch={onSearch}
+          />
           <TouchableOpacity
             style={{ position: "relative" }}
-            onPress={() => {}}
+            onPress={() => {
+              props.navigation.navigate("CartStack");
+            }}
             activeOpacity={0.7}
           >
             <Icon
@@ -61,7 +112,7 @@ const HomeScreen = (props) => {
                 borderRadius: 6,
               }}
             />
-            <Badge></Badge>
+            {/* <Badge></Badge> */}
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -76,8 +127,23 @@ const HomeScreen = (props) => {
             }}
             title={"Điện thoại"}
           >
-            <Icon
-              name="mobile-alt"
+            <MIcon
+              name="cellphone"
+              size={20}
+              color={AppStyles.ColorStyles.color.primary_normal}
+            />
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              props.navigation.navigate("ListProductScreen", {
+                id: 3,
+                name: "Laptop",
+              });
+            }}
+            title={"Laptop"}
+          >
+            <MIcon
+              name="laptop"
               size={20}
               color={AppStyles.ColorStyles.color.primary_normal}
             />
@@ -86,34 +152,27 @@ const HomeScreen = (props) => {
             onClick={() => {
               props.navigation.navigate("ListProductScreen", {
                 id: 2,
-                name: "Laptop",
+                name: "Ipad",
               });
             }}
-            title={"Laptop"}
+            title={"Tablet"}
           >
-            <Icon
-              name="laptop"
-              size={20}
-              color={AppStyles.ColorStyles.color.primary_normal}
-            />
-          </MenuItem>
-          <MenuItem title={"Tablet"}>
-            <Icon
-              name="tablet-alt"
+            <MIcon
+              name="tablet-android"
               size={20}
               color={AppStyles.ColorStyles.color.primary_normal}
             />
           </MenuItem>
           <MenuItem title={"Đồng hồ"}>
-            <Ionicons
-              name="ios-watch-outline"
+            <MIcon
+              name="watch-variant"
               size={20}
               color={AppStyles.ColorStyles.color.primary_normal}
             />
           </MenuItem>
           <MenuItem title={"Tivi"}>
-            <Icon
-              name="tv"
+            <MIcon
+              name="television"
               size={20}
               color={AppStyles.ColorStyles.color.primary_normal}
             />
@@ -132,6 +191,21 @@ const HomeScreen = (props) => {
           </TouchableOpacity>
         </View>
       </View>
+      {!!products ? (
+        <View style={styles.content}>
+          <Text style={[AppStyles.FontStyle.headline_6, { marginLeft: 8 }]}>
+            Sản phẩm nổi bật
+          </Text>
+          <FlatList
+            data={products.data}
+            renderItem={ItemProduct}
+            keyExtractor={(item) => item.id}
+            key={(item) => item.id}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+          ></FlatList>
+        </View>
+      ) : null}
     </ScrollView>
   );
 };
@@ -170,15 +244,15 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 10,
     backgroundColor: "white",
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.23,
-    shadowRadius: 2.62,
+    // shadowColor: "#000000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.23,
+    // shadowRadius: 2.62,
 
-    elevation: 4,
+    // elevation: 4,
   },
   menuTop: {
     display: "flex",
@@ -199,5 +273,9 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     margin: 8,
     textAlign: "center",
+  },
+  content: {
+    flex: 1,
+    marginVertical: 16,
   },
 });

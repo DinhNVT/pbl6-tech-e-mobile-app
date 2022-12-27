@@ -9,38 +9,39 @@ import {
 import { React, useEffect, useState } from "react";
 
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import AppStyles from "../../theme/AppStyles";
-import Loading from "../../component/Loading";
+import AppStyles from "../../../theme/AppStyles";
+import Loading from "../../../component/Loading";
 import { useIsFocused } from "@react-navigation/native";
-import ProductService from "../../config/service/ProductService";
-import Dropdown from "../../component/Dropdown";
-import Input from "../../component/Input";
+import ProductService from "../../../config/service/ProductService";
+import Dropdown from "../../../component/Dropdown";
+import Input from "../../../component/Input";
 
-const AddProductScreen = (props) => {
-  const { dataUser } = props.route.params;
+const EditInformationProduct = (props) => {
+  const { idUser, product } = props;
   const [itemDropdown, setItemDropdown] = useState();
   const [inputData, setInputData] = useState({
-    category: null,
-    name: "Tên sản phẩm",
-    original_price: "0",
-    discount_rate: "0",
-    quantity_sold: "0",
-    shortDescription: "mô tả ngắn",
-    description: "mô tả chi tiết",
-    brand: "samsung",
-    cpuSpeed: "24GB",
-    GPU: "RTX 3060",
-    RAM: "12GB",
-    ROM: "128GB",
-    screenSize: "6.1inch",
-    pin: "2301mAh",
-    weight: "233g",
-    chip: "Apple A13",
-    material: "Nhôm",
+    category: product.category,
+    name: product.name,
+    original_price: product.original_price.toString(),
+    discount_rate: product.discount_rate.toString(),
+    quantity_sold: product.quantity_sold.toString(),
+    shortDescription: product.short_description,
+    description: product.description,
+    brand: product.speficication.brand,
+    cpuSpeed: product.speficication.cpu_speed,
+    GPU: product.speficication.gpu,
+    RAM: product.speficication.ram,
+    ROM: product.speficication.rom,
+    screenSize: product.speficication.screen_size,
+    pin: product.speficication.battery_capacity,
+    weight: product.speficication.weight,
+    chip: product.speficication.chip_set,
+    material: product.speficication.material,
   });
   const [errorInput, setErrorInput] = useState({
     name: false,
     error: false,
+    success: false,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -56,66 +57,22 @@ const AddProductScreen = (props) => {
           title: item.name,
         });
       });
-      if (inputData.category == null)
-        setInputData({ ...inputData, category: itemDropdown[0].id });
       setItemDropdown(itemDropdown);
     }
   };
 
   useEffect(() => {
     handleGetCategory();
-    props.navigation.setOptions({
-      header: ({ navigation, back }) => {
-        return (
-          <View style={styles.headerStyle}>
-            <View style={styles.headerLeft}>
-              {back ? (
-                <TouchableOpacity
-                  onPress={navigation.goBack}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={{
-                      color: AppStyles.ColorStyles.color.primary_normal,
-                    }}
-                  >
-                    Thoát
-                  </Text>
-                </TouchableOpacity>
-              ) : undefined}
-              <Text
-                style={[AppStyles.FontStyle.headline_6, { marginLeft: 20 }]}
-              >
-                Thêm sản phẩm
-              </Text>
-            </View>
-            <View style={styles.headerRight}>
-              <TouchableOpacity
-                style={styles.btnNext}
-                onPress={handlerCreateProduct}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[AppStyles.FontStyle.subtitle_1, { color: "white" }]}
-                >
-                  Tiếp
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        );
-      },
-    });
-  }, [props.navigation, inputData]);
+  }, [inputData]);
 
   const onChangeItem = (chooseId) => {
     setInputData({ ...inputData, category: chooseId });
   };
 
-  const handlerCreateProduct = () => {
+  const handlerUpdateProduct = () => {
     Keyboard.dismiss();
     setErrorInput((prevErrorInput) => {
-      return { ...prevErrorInput, error: false };
+      return { ...prevErrorInput, error: false, success: false };
     });
     var check = false;
     if (!inputData.name || inputData.name.length > 100) {
@@ -130,15 +87,15 @@ const AddProductScreen = (props) => {
     }
     if (!check) {
       setIsLoading(true);
-      ProductService.postCreateProduct({
-        seller: dataUser.data.id,
+      ProductService.putUpdateProduct(product.id, {
+        seller: idUser,
         category: inputData.category,
         name: inputData.name,
         short_description: inputData.shortDescription,
         description: inputData.description,
         original_price: inputData.original_price,
         discount_rate: inputData.discount_rate,
-        quantity_sold: "0",
+        quantity_sold: inputData.quantity_sold,
         speficication: {
           brand: inputData.brand,
           cpu_speed: inputData.cpuSpeed,
@@ -152,23 +109,23 @@ const AddProductScreen = (props) => {
           material: inputData.material,
         },
       }).then((res) => {
-        if (res.message == "Create product is success!") {
-          props.navigation.replace("AddImageProduct", {
-            id: res.data.id,
-            userId: dataUser.data.id,
-          });
-          setIsLoading(false);
-        } else {
-          console.log("Error");
+        if (res.message == "Product updated is sucess!") {
           setIsLoading(false);
           setErrorInput((prevErrorInput) => {
-            return { ...prevErrorInput, error: true };
+            return { ...prevErrorInput, error: false, success: true };
+          });
+        } else {
+          console.log("Error");
+          console.log(res)
+          setIsLoading(false);
+          setErrorInput((prevErrorInput) => {
+            return { ...prevErrorInput, error: true, success: false };
           });
         }
       });
     } else {
       setErrorInput((prevErrorInput) => {
-        return { ...prevErrorInput, error: false };
+        return { ...prevErrorInput, error: false, success: false };
       });
     }
   };
@@ -176,12 +133,38 @@ const AddProductScreen = (props) => {
   return (
     <ScrollView style={styles.container}>
       <View style={{ alignItems: "center", width: "100%", marginVertical: 24 }}>
+        <View style={styles.editCard}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={[styles.addToCart, styles.btnDelete]}
+            onPress={props.onCancel}
+          >
+            <Text
+              style={{
+                color: AppStyles.ColorStyles.color.primary_normal,
+              }}
+            >
+              Quay lại
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handlerUpdateProduct}
+            activeOpacity={0.7}
+            style={[styles.addToCart, styles.btnEdit]}
+          >
+            <Text style={{ color: "white" }}>Lưu</Text>
+          </TouchableOpacity>
+        </View>
         {isLoading && <Loading />}
-        {errorInput.error && (
-          <Text style={[AppStyles.FontStyle.subtitle_1, styles.textError]}>
-            Không thành công
+        {errorInput.success ? (
+          <Text style={[AppStyles.FontStyle.subtitle_1, styles.textSuccess]}>
+            Sửa thành công
           </Text>
-        )}
+        ) : errorInput.error ? (
+          <Text style={[AppStyles.FontStyle.subtitle_1, styles.textError]}>
+            Sửa không thành công
+          </Text>
+        ) : null}
         <Text style={[AppStyles.FontStyle.headline_6, { marginBottom: 16 }]}>
           Thông tin cơ bản
         </Text>
@@ -193,7 +176,7 @@ const AddProductScreen = (props) => {
             <Dropdown
               onChange={onChangeItem}
               itemDropdown={itemDropdown}
-              id={itemDropdown[0].id}
+              id={product.category}
               style={styles.dropdown}
             ></Dropdown>
           )}
@@ -240,6 +223,20 @@ const AddProductScreen = (props) => {
               setInputData({ ...inputData, discount_rate: e });
             }}
             placeholder="Nhập số giảm giá"
+            style={styles.inputText}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.inputView}>
+          <Text style={[AppStyles.FontStyle.body_2, styles.label]}>
+            Số lượng*
+          </Text>
+          <Input
+            value={inputData.quantity_sold}
+            onChangeText={(e) => {
+              setInputData({ ...inputData, quantity_sold: e });
+            }}
+            placeholder="Nhập số lượng"
             style={styles.inputText}
             keyboardType="numeric"
           />
@@ -408,7 +405,7 @@ const AddProductScreen = (props) => {
   );
 };
 
-export default AddProductScreen;
+export default EditInformationProduct;
 
 const styles = StyleSheet.create({
   container: {
@@ -476,6 +473,50 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     width: "90%",
+  },
+  textError: {
+    color: AppStyles.ColorStyles.color.error_400,
+    marginTop: 8,
+    width: "100%",
+    textAlign: "center",
+    marginLeft: 8,
+    marginBottom: 16,
+  },
+  editCard: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    // paddingHorizontal: 24,
+  },
+  btnDelete: {
+    width: "45%",
+    backgroundColor: "white",
+    borderColor: AppStyles.ColorStyles.color.primary_normal,
+    borderWidth: 1,
+  },
+  addToCart: {
+    backgroundColor: AppStyles.ColorStyles.color.primary_normal,
+    // marginTop: 8,
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    padding: 8,
+    width: "100%",
+    marginHorizontal: 8,
+    marginBottom: 8,
+  },
+  btnEdit: {
+    width: "45%",
+  },
+  textSuccess: {
+    color: AppStyles.ColorStyles.color.success_400,
+    marginTop: 8,
+    width: "100%",
+    textAlign: "center",
+    marginLeft: 8,
+    marginBottom: 16,
   },
   textError: {
     color: AppStyles.ColorStyles.color.error_400,

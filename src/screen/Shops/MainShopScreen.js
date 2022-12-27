@@ -69,8 +69,15 @@ const MainShopScreen = (props) => {
   const handleDeleteProduct = (id) => {
     ProductService.deleteProduct(id).then((res) => {
       if (res.message == "Product deleted is success!") {
-        getProduct()
+        getProduct();
       }
+    });
+  };
+
+  const handleEditProduct = (id) => {
+    props.navigation.navigate("MainUpdateProduct", {
+      idUser: dataUser.data.id,
+      idProduct: id,
     });
   };
 
@@ -79,7 +86,7 @@ const MainShopScreen = (props) => {
       <CardProductItem
         key={item.id}
         onPress={() => {
-          props.navigation.navigate("ProductDetailScreen", {
+          props.navigation.navigate("ViewProductScreen", {
             id: item.id,
           });
         }}
@@ -87,12 +94,21 @@ const MainShopScreen = (props) => {
         a={item.rating_average}
         originalPrice={item.original_price}
         price={item.price}
-        url={item.img_products.length > 0 ? item.img_products[0].link : ""}
+        url={
+          item.img_products.length > 0
+            ? `${item.img_products[0].link}${
+                item.img_products[0].link.toString().includes("?") ? "&" : "?"
+              }time'${new Date().getTime()}`
+            : ""
+        }
         discount={item.discount_rate}
         addToCart={false}
         quantitySold={item.quantity_sold}
         handleDelete={() => {
           handleDeleteProduct(item.id);
+        }}
+        handleEdit={() => {
+          handleEditProduct(item.id);
         }}
       />
     );
