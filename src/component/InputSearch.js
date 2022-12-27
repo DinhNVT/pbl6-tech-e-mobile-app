@@ -13,7 +13,7 @@ import AppStyles from "../theme/AppStyles";
 const InputSearch = (props) => {
   return (
     <View style={styles.container}>
-      <TextInput onSubmitEditing={props.onSearch}  style={styles.input}></TextInput>
+      <TextInput value={props.value} onChangeText={props.onChangeText} onSubmitEditing={props.onSearch}  style={styles.input}></TextInput>
       <TouchableOpacity activeOpacity={0.5} onPress={props.onSearch}>
         <Icon
           name="search"

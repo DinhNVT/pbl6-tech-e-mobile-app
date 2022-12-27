@@ -28,7 +28,7 @@ const refreshToken = async () => {
   const value = await AsyncStorage.getItem("@Login");
   if (value !== null) {
     const data = JSON.parse(value);
-    saveDataLogin({
+    await saveDataLogin({
       message: data.message,
       data: data.data,
       token: {
@@ -95,7 +95,7 @@ const isLogin = async () => {
       AuthenticationService.clearDataLogin();
       return false;
     } else if (tokenDecodedAccess.exp < Math.floor(Date.now() / 1000)) {
-      AuthenticationService.refreshToken();
+      await AuthenticationService.refreshToken();
     }
   } else {
     return false;
@@ -114,7 +114,7 @@ const AuthenticationService = {
   getDataUser,
   getTokenUser,
   postResetPassword,
-  patchChangePassword
+  patchChangePassword,
 };
 
 export default AuthenticationService;

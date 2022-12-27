@@ -4,7 +4,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  Keyboard
+  Keyboard,
 } from "react-native";
 import { React, useState, useEffect } from "react";
 
@@ -136,7 +136,7 @@ const EditUserProfileScreen = (props) => {
   };
 
   const handleEditUserProfile = () => {
-    Keyboard.dismiss()
+    Keyboard.dismiss();
     setErrorInput((prevErrorInput) => {
       return { ...prevErrorInput, error: false, success: false };
     });
@@ -257,20 +257,18 @@ const EditUserProfileScreen = (props) => {
           />
         </View>
         <View style={styles.inputView}>
-          <Text style={[AppStyles.FontStyle.body_2, styles.label]}>Email</Text>
+          <Text style={[AppStyles.FontStyle.body_2, styles.labelReadOnly]}>
+            Email
+          </Text>
           <Input
             value={inputData.email}
             onChangeText={(e) => {
               setInputData({ ...inputData, email: e });
             }}
             placeholder="Nhập email"
-            style={styles.inputText}
+            style={styles.inputTextReadOnly}
+            editable={false}
           />
-          {errorInput.email ? (
-            <Text style={[AppStyles.FontStyle.body_2, styles.textError]}>
-              *Email sai
-            </Text>
-          ) : null}
         </View>
         <View style={styles.inputView}>
           <Text style={[AppStyles.FontStyle.body_2, styles.label]}>Họ*</Text>

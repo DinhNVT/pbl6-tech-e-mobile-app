@@ -13,6 +13,7 @@ import { React, useEffect, useState, useCallback } from "react";
 
 import Product from "../../../assets/image/product.png";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import IconM from "react-native-vector-icons/MaterialCommunityIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AppStyles from "../../theme/AppStyles";
 import Star from "../../component/Star";
@@ -23,6 +24,11 @@ import Loading from "../../component/Loading";
 import AccountService from "../../config/service/AccountService";
 import Config from "react-native-config";
 import RenderHtml from "react-native-render-html";
+import ButtonOutlined from "../../component/ButtonOutlined";
+import AuthenticationService from "../../config/service/AuthenticationService";
+import CartService from "../../config/service/CartService";
+import { useIsFocused } from "@react-navigation/native";
+import ButtonFilled from "../../component/ButtonFilled";
 
 const ProductDetailScreen = ({ navigation, route }) => {
   const [isViewMore, setIsViewMore] = useState(false);
@@ -32,15 +38,23 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [seller, setSeller] = useState();
   const API_URL = new URL(Config.API_URL);
   const { width } = useWindowDimensions();
+  const [reviews, setReviews] = useState([]);
+  const [isAdd, setIsAdd] = useState(false);
+  const [variant, setVariant] = useState([]);
+  const [variantId, setVariantId] = useState({
+    idColor: "",
+    idMemory: "",
+  });
+  const [quality, setQuality] = useState(1);
+  const [childId, setChildId] = useState("");
+  const [sameProduct, setSameProduct] = useState([]);
+  const isFocused = useIsFocused();
 
   const getProductDetail = async () => {
     setIsLoading(true);
     const getProduct = await ProductService.getDetailProduct(route.params.id)
       .then((res) => {
         if (!!res.data) {
-          setProduct(res.data);
-          setIdImage(res.data.img_products[0].id);
-          setIsLoading(false);
           return res;
         }
       })
@@ -48,16 +62,38 @@ const ProductDetailScreen = ({ navigation, route }) => {
         console.error(e);
         setIsLoading(false);
       });
-    AccountService.getSellerProfile(getProduct.data.seller).then((res) => {
+    const getSeller = await AccountService.getSellerProfile(
+      getProduct.data.seller
+    ).then((res) => {
       if (!!res.data) {
-        setSeller(res.data);
+        return res;
       }
       setIsLoading(false);
     });
+    if (!!getProduct.data.speficication.brand) {
+      const getSame = await ProductService.getListProducts(
+        `brand=${getProduct.data.speficication.brand}`
+      ).then((res) => {
+        return res;
+      });
+      setSameProduct(getSame.results);
+    }
+    setProduct(getProduct.data);
+    setIdImage(getProduct.data.img_products[0].id);
+    setSeller(getSeller.data);
+    setIsLoading(false);
   };
+
+  const reviewProduct = () => {
+    ProductService.getReview(route.params.id).then((res) => {
+      if (!!res.data) setReviews(res.data);
+    });
+  };
+
   useEffect(() => {
     getProductDetail();
-  }, []);
+    reviewProduct();
+  }, [isFocused, navigation]);
 
   const OpenURLButton = ({ url, children }) => {
     const handlePress = useCallback(async () => {
@@ -85,11 +121,337 @@ const ProductDetailScreen = ({ navigation, route }) => {
     );
   };
 
+  const handleAddColorVariant = (value, id) => {
+    setVariantId((old) => {
+      return { ...old, idColor: id };
+    });
+    let arrNew = [...variant];
+    if (arrNew.find((item) => item.name == "Màu")) {
+      arrNew[arrNew.findIndex((item) => item.name == "Màu")] = {
+        name: "Màu",
+        value: value,
+      };
+    } else {
+      arrNew.push({
+        name: "Màu",
+        value: value,
+      });
+    }
+    setVariant(arrNew);
+    setChildId(product.product_childs.find((item) => item.id == id));
+  };
+  const handleAddMemoryVariant = (value, id) => {
+    setVariantId((old) => {
+      return { ...old, idMemory: id };
+    });
+    let arrNew = [...variant];
+    if (arrNew.find((item) => item.name == "Dung lượng")) {
+      arrNew[arrNew.findIndex((item) => item.name == "Dung lượng")] = {
+        name: "Dung lượng",
+        value: value,
+      };
+    } else {
+      arrNew.push({
+        name: "Dung lượng",
+        value: value,
+      });
+    }
+    setVariant(arrNew);
+  };
+
+  const handleAddToCart = async () => {
+    // console.log(product.id);
+    // console.log(quality);
+    // console.log(variant);
+    if (product.product_variants.length == variant.length) {
+      const idUser = await AuthenticationService.getDataUser();
+      CartService.postAddToCart({
+        user: idUser.id,
+        product_id: product.id,
+        variants: variant,
+        quantity: quality,
+      }).then((res) => {
+        // console.log(res);
+        if (res.message == "Add product into cart is success!") {
+          Alert.alert(`Thêm vào giỏ hàng thành công`);
+          resetAllCart();
+          setIsAdd(!isAdd);
+        } else {
+          Alert.alert(`Thêm vào giỏ hàng thất bại`);
+          console.log(res);
+        }
+      });
+    }
+  };
+
+  const resetAllCart = () => {
+    setQuality(1);
+    setVariantId({
+      idColor: "",
+      idMemory: "",
+    });
+    setVariant([]);
+    setChildId("");
+  };
+
+  const handleCheckAddToCart = async () => {
+    if (await AuthenticationService.isLogin()) {
+      setIsAdd(!isAdd);
+    } else {
+      Alert.alert(`Bạn chưa đăng nhập`);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {isAdd ? (
+        <View style={styles.addCartItem}>
+          <View style={styles.cartChooseItem}>
+            <View style={styles.headerAddCart}>
+              {!!childId && (
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    width: "70%",
+                  }}
+                >
+                  <Image
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 8,
+                      marginRight: 8,
+                      overflow: "hidden",
+                    }}
+                    resizeMode="cover"
+                    source={{ uri: childId.thumbnail_url }}
+                  ></Image>
+                  <View style={{ width: 250 }}>
+                    <Text
+                      numberOfLines={3}
+                      style={AppStyles.FontStyle.subtitle_1}
+                    >
+                      {childId.name}
+                    </Text>
+                    <Text
+                      style={{
+                        color: AppStyles.ColorStyles.color.primary_normal,
+                      }}
+                    >
+                      {!!childId.price
+                        ? childId.price
+                            .toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                        : "0"}
+                      đ
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              <TouchableOpacity
+                onPress={() => {
+                  setIsAdd(!isAdd);
+                  resetAllCart();
+                }}
+              >
+                <Ionicons
+                  name="ios-close-circle-outline"
+                  size={34}
+                  color={"gray"}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={{ height: 580 }}>
+              <ScrollView>
+                {product.product_variants.find(
+                  (itemColor) => itemColor.name == "Màu"
+                ) &&
+                product.product_variants.find(
+                  (itemColor) => itemColor.name == "Màu"
+                ).options.length > 0 ? (
+                  <View style={styles.variantItem}>
+                    <Text>Màu sắc</Text>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {product.product_variants
+                        .find((itemColor) => itemColor.name == "Màu")
+                        .options.filter(
+                          (valueO, index, self) =>
+                            index ===
+                            self.findIndex((t) => t.value === valueO.value)
+                        )
+                        .map((item) => (
+                          <TouchableOpacity
+                            onPress={() => {
+                              handleAddColorVariant(
+                                item.value,
+                                item.product_child
+                              );
+                            }}
+                            style={[
+                              styles.itemVariant,
+                              {
+                                backgroundColor:
+                                  variantId.idColor == item.product_child
+                                    ? AppStyles.ColorStyles.color.primary_normal
+                                    : AppStyles.ColorStyles.color.gray_200,
+                              },
+                            ]}
+                          >
+                            <Image
+                              style={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: 4,
+                                marginRight: 4,
+                              }}
+                              resizeMode="cover"
+                              source={{
+                                uri: `${
+                                  product.product_childs.find(
+                                    (itemIMG) =>
+                                      itemIMG.id == item.product_child
+                                  ).thumbnail_url
+                                }`,
+                              }}
+                            ></Image>
+                            <Text>{item.value}</Text>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  </View>
+                ) : null}
+                {product.product_variants.find(
+                  (itemMemory) => itemMemory.name == "Dung lượng"
+                ) &&
+                product.product_variants.find(
+                  (itemMemory) => itemMemory.name == "Dung lượng"
+                ).options.length > 0 ? (
+                  <View style={styles.variantItem}>
+                    <Text>Dung lượng</Text>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {product.product_variants
+                        .find((itemMemory) => itemMemory.name == "Dung lượng")
+                        .options.filter(
+                          (valueO, index, self) =>
+                            index ===
+                            self.findIndex((t) => t.value === valueO.value)
+                        )
+                        .map((item) => (
+                          <TouchableOpacity
+                            onPress={() => {
+                              handleAddMemoryVariant(
+                                item.value,
+                                item.product_child
+                              );
+                            }}
+                            style={[
+                              styles.itemVariant,
+                              {
+                                backgroundColor:
+                                  variantId.idMemory == item.product_child
+                                    ? AppStyles.ColorStyles.color.primary_normal
+                                    : AppStyles.ColorStyles.color.gray_200,
+                              },
+                            ]}
+                          >
+                            <Text>{item.value}</Text>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  </View>
+                ) : null}
+                <View style={[styles.variantItem, { paddingBottom: 80 }]}>
+                  <Text>Số lượng</Text>
+                  <View style={styles.quality}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (quality > 1) setQuality(quality - 1);
+                        else setQuality(1);
+                      }}
+                      activeOpacity={quality == 1 ? 1 : 0.7}
+                    >
+                      <IconM
+                        name="minus-circle"
+                        size={32}
+                        color={
+                          quality == 1
+                            ? AppStyles.ColorStyles.color.gray_400
+                            : AppStyles.ColorStyles.color.primary_normal
+                        }
+                      />
+                    </TouchableOpacity>
+                    <Text
+                      style={[
+                        AppStyles.FontStyle.subtitle_1,
+                        { marginHorizontal: 8 },
+                      ]}
+                    >
+                      {quality}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setQuality(quality + 1);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <IconM
+                        name="plus-circle"
+                        size={32}
+                        color={AppStyles.ColorStyles.color.primary_normal}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+          {product.product_variants.length > 0 && (
+            <View style={styles.addCartBtn}>
+              <ButtonOutlined
+                style={{
+                  backgroundColor:
+                    product.product_variants.length == variant.length
+                      ? AppStyles.ColorStyles.color.primary_normal
+                      : "gray",
+                }}
+                onPress={() => {
+                  handleAddToCart();
+                }}
+              >
+                Thêm vào giỏ hàng
+              </ButtonOutlined>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View style={styles.addCartBtn}>
+          <ButtonOutlined
+            onPress={() => {
+              handleCheckAddToCart();
+            }}
+          >
+            Thêm vào giỏ hàng
+          </ButtonOutlined>
+        </View>
+      )}
+
       {isLoading && <Loading />}
       {!isLoading && !!product ? (
-        <View>
+        <View style={{ paddingBottom: 58 }}>
           <TouchableOpacity
             onPress={() => {
               navigation.goBack();
@@ -99,7 +461,13 @@ const ProductDetailScreen = ({ navigation, route }) => {
           >
             <Icon name="arrow-alt-circle-left" size={25} color={"white"} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.4} style={styles.btnRight}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("CartStack");
+            }}
+            activeOpacity={0.4}
+            style={styles.btnRight}
+          >
             <Icon name="shopping-cart" size={20} color={"white"} />
           </TouchableOpacity>
           <ScrollView>
@@ -107,9 +475,22 @@ const ProductDetailScreen = ({ navigation, route }) => {
               <Image
                 resizeMode="cover"
                 style={styles.image}
-                source={{
-                  uri: product.img_products.find((p) => p.id == idImage).link,
-                }}
+                source={
+                  product.img_products.length > 0
+                    ? {
+                        uri: `${
+                          product.img_products.find((p) => p.id == idImage).link
+                        }${
+                          product.img_products
+                            .find((p) => p.id == idImage)
+                            .link.toString()
+                            .includes("?")
+                            ? "&"
+                            : "?"
+                        }time'${new Date().getTime()}`,
+                      }
+                    : { uri: "" }
+                }
               ></Image>
             </View>
             <View
@@ -146,7 +527,11 @@ const ProductDetailScreen = ({ navigation, route }) => {
                           },
                         ]}
                         resizeMode="cover"
-                        source={{ uri: item.link }}
+                        source={{
+                          uri: `${item.link}${
+                            item.link.toString().includes("?") ? "&" : "?"
+                          }time'${new Date().getTime()}`,
+                        }}
                       ></Image>
                     </TouchableOpacity>
                   );
@@ -216,7 +601,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     <View style={styles.shopInfoChild}>
                       <Text
                         style={[
-                          AppStyles.FontStyle.headline_6,
+                          AppStyles.FontStyle.subtitle_1,
                           { color: AppStyles.ColorStyles.color.gray_800 },
                         ]}
                       >
@@ -360,40 +745,35 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 >
                   Sản phẩm tương tự
                 </Text>
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.sameProduct}
-                >
-                  <CardProductItem
-                    // onPress={() => {
-                    //   props.navigation.navigate("ProductDetailScreen");
-                    // }}
-                    style={styles.cardItem}
-                    title={"title "}
-                    a={3.6}
-                    originalPrice={3213242}
-                    price={4241412}
-                    url={
-                      "https://image.thanhnien.vn/w1024/Uploaded/2022/yfrph/2022_10_08/b2943e85-fc37-4d71-827b-294393d8466c-769.jpeg"
-                    }
-                    discount={20}
-                  />
-                  <CardProductItem
-                    // onPress={() => {
-                    //   props.navigation.navigate("ProductDetailScreen");
-                    // }}
-                    style={styles.cardItem}
-                    title={"title "}
-                    a={3.6}
-                    originalPrice={3213242}
-                    price={4241412}
-                    url={
-                      "https://image.thanhnien.vn/w1024/Uploaded/2022/yfrph/2022_10_08/b2943e85-fc37-4d71-827b-294393d8466c-769.jpeg"
-                    }
-                    discount={20}
-                  />
-                </ScrollView>
+                {sameProduct.length > 0 && (
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.sameProduct}
+                  >
+                    {sameProduct.map((item) => (
+                      <CardProductItem
+                        onPress={() => {
+                          navigation.replace("ProductDetailScreen", {
+                            id: item.id,
+                          });
+                        }}
+                        style={styles.cardItem}
+                        title={item.name}
+                        a={item.rating_average}
+                        originalPrice={item.original_price}
+                        price={item.price}
+                        url={
+                          item.img_products.length > 0
+                            ? item.img_products[0].link
+                            : ""
+                        }
+                        discount={item.discount_rate}
+                        addToCart={true}
+                      />
+                    ))}
+                  </ScrollView>
+                )}
               </View>
               <View>
                 <Text
@@ -414,26 +794,39 @@ const ProductDetailScreen = ({ navigation, route }) => {
                       },
                     ]}
                   >
-                    4.5
+                    {product.rating_average.toFixed(1)}
                   </Text>
-                  <Star a={1}></Star>
-                  <Text>34323 đánh giá</Text>
+                  <Star a={product.rating_average.toFixed(1)}></Star>
+                  <Text>{product.review_count} đánh giá</Text>
                 </View>
-                <ReviewItem
-                  name={"Nguyen Huu Dinh"}
-                  content={"San phẩm ok"}
-                  a={4.5}
-                ></ReviewItem>
-                <ReviewItem
-                  name={"Nguyen Huu Dinh"}
-                  content={"San phẩm ok"}
-                  a={4.5}
-                ></ReviewItem>
-                <ReviewItem
-                  name={"Le Dinh San"}
-                  content={"San phẩm ok qua chat luowng"}
-                  a={4}
-                ></ReviewItem>
+                <ButtonFilled
+                  onPress={async () => {
+                    if (await AuthenticationService.isLogin()) {
+                      navigation.navigate("ReviewProductScreen", {
+                        idProduct: product.id,
+                      });
+                    } else {
+                      Alert.alert(`Bạn chưa đăng nhập`);
+                    }
+                  }}
+                >
+                  Đánh giá
+                </ButtonFilled>
+                {reviews.map((item) => (
+                  <ReviewItem
+                    name={item.user.name}
+                    content={item.comment}
+                    a={item.rating}
+                    date={`${new Date(
+                      item.time_interactive
+                    ).toLocaleTimeString()} ${new Date(
+                      item.time_interactive
+                    ).toLocaleDateString()}`}
+                    uri={`${item.link}${
+                      item.link.toString().includes("?") ? "&" : "?"
+                    }time'${new Date().getTime()}`}
+                  ></ReviewItem>
+                ))}
               </View>
             </View>
           </ScrollView>
@@ -450,6 +843,65 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "relative",
     backgroundColor: "white",
+  },
+  addCartItem: {
+    position: "absolute",
+    flex: 1,
+    backgroundColor: "#000000C1",
+    width: "100%",
+    height: "100%",
+    zIndex: 1000,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    display: "flex",
+    justifyContent: "flex-end",
+  },
+  addCartBtn: {
+    position: "absolute",
+    zIndex: 999,
+    bottom: 8,
+    left: 8,
+    right: 8,
+  },
+  quality: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+  cartChooseItem: {
+    display: "flex",
+    justifyContent: "flex-start",
+    flexDirection: "column",
+    backgroundColor: "white",
+    height: 700,
+    padding: 8,
+  },
+  headerAddCart: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 120,
+  },
+  variantItem: {
+    borderTopColor: AppStyles.ColorStyles.color.gray_200,
+    borderTopWidth: 1,
+    marginTop: 8,
+    paddingTop: 8,
+  },
+  itemVariant: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: AppStyles.ColorStyles.color.gray_200,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    paddingVertical: 6,
+    marginRight: 8,
+    marginVertical: 8,
   },
   imageContainer: {
     width: "100%",

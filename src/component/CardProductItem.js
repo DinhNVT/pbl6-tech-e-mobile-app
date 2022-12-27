@@ -66,14 +66,15 @@ const CardProductItem = (props) => {
           <Text>{props.quantitySold} đã bán</Text>
         </View>
         {!!props.addToCart ? (
-          <TouchableOpacity activeOpacity={0.7} style={styles.addToCart}>
-            <FontAwesome
-              name="cart-plus"
-              size={20}
-              color={"white"}
-              style={{}}
-            />
-          </TouchableOpacity>
+          <View></View>
+          // <TouchableOpacity activeOpacity={0.7} style={styles.addToCart}>
+          //   <FontAwesome
+          //     name="cart-plus"
+          //     size={20}
+          //     color={"white"}
+          //     style={{}}
+          //   />
+          // </TouchableOpacity>
         ) : (
           <View style={styles.editCard}>
             <TouchableOpacity
@@ -90,6 +91,7 @@ const CardProductItem = (props) => {
             <TouchableOpacity
               activeOpacity={0.7}
               style={[styles.addToCart, styles.btnEdit]}
+              onPress={props.handleEdit}
             >
               <Text style={{ color: "white" }}>Sửa</Text>
             </TouchableOpacity>
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    height: 100,
+    height: 170,
   },
   image: {
     width: "100%",

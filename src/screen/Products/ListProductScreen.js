@@ -15,12 +15,15 @@ import Dropdown from "../../component/Dropdown";
 import InputSearch from "../../component/InputSearch";
 import Badge from "../../component/Badge";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import MIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const ListProductScreen = (props) => {
   // console.log(props.route.params);
   const [products, setProducts] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [paramsGetProducts, setParamsGetProducts] = useState("");
+  const [paramsPage, setParamsPage] = useState(1);
+  const [keyword, setKeyword] = useState();
 
   const getListProducts = (params) => {
     setIsLoading(true);
@@ -34,8 +37,10 @@ const ListProductScreen = (props) => {
   };
 
   useEffect(() => {
-    getListProducts(`category=${props.route.params.id}&${paramsGetProducts}`);
-  }, [paramsGetProducts]);
+    getListProducts(
+      `category=${props.route.params.id}&${paramsGetProducts}&page=${paramsPage}`
+    );
+  }, [paramsGetProducts, paramsPage]);
 
   const item = [
     { id: 1, title: "Mặc định" },
@@ -47,14 +52,33 @@ const ListProductScreen = (props) => {
     if (chooseId == 1) {
       setParamsGetProducts("");
     } else if (chooseId == 2) {
-      setParamsGetProducts("ordering=price");
-    } else if (chooseId == 3) {
       setParamsGetProducts("ordering=-price");
+    } else if (chooseId == 3) {
+      setParamsGetProducts("ordering=price");
     }
   };
 
   const onSearch = () => {
-    props.navigation.navigate("SearchScreen");
+    if (!!keyword)
+      props.navigation.navigate("SearchScreen", {
+        keyword: keyword,
+      });
+  };
+
+  const handlePaging = (status) => {
+    const indexPageNext = products.next.indexOf("page");
+    const indexPagePre = products.previous.indexOf("page");
+    if (status == "next" && !!products.next && indexPageNext > 0) {
+      setParamsPage(
+        products.next.substring(indexPageNext + 5, indexPageNext + 7)
+      );
+    } else if (status == "pre" && !!products.previous && indexPagePre > 0) {
+      setParamsPage(
+        products.previous.substring(indexPagePre + 5, indexPagePre + 7)
+      );
+    } else {
+      setParamsPage(1);
+    }
   };
 
   const ItemProduct = ({ item }) => {
@@ -70,7 +94,13 @@ const ListProductScreen = (props) => {
         a={item.rating_average}
         originalPrice={item.original_price}
         price={item.price}
-        url={item.img_products.length > 0 ? item.img_products[0].link : ""}
+        url={
+          item.img_products.length > 0
+            ? `${item.img_products[0].link}${
+                item.img_products[0].link.toString().includes("?") ? "&" : "?"
+              }time'${new Date().getTime()}`
+            : ""
+        }
         discount={item.discount_rate}
         addToCart={true}
         quantitySold={item.quantity_sold}
@@ -96,10 +126,16 @@ const ListProductScreen = (props) => {
             />
           </TouchableOpacity>
         </View>
-        <InputSearch onSearch={onSearch} />
+        <InputSearch
+          value={keyword}
+          onChangeText={setKeyword}
+          onSearch={onSearch}
+        />
         <TouchableOpacity
           style={{ position: "relative" }}
-          onPress={() => {}}
+          onPress={() => {
+            props.navigation.navigate("CartStack");
+          }}
           activeOpacity={0.7}
         >
           <Icon
@@ -112,7 +148,7 @@ const ListProductScreen = (props) => {
               borderRadius: 6,
             }}
           />
-          <Badge></Badge>
+          {/* <Badge></Badge> */}
         </TouchableOpacity>
       </View>
       <View style={styles.headerTitle}>
@@ -143,6 +179,51 @@ const ListProductScreen = (props) => {
             numColumns={2}
             showsVerticalScrollIndicator={false}
           ></FlatList>
+          {!products.previous && !products.next ? null : (
+            <View
+              style={{
+                marginHorizontal: 8,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  handlePaging("pre");
+                }}
+                activeOpacity={!products.previous ? 1 : 0.5}
+              >
+                <MIcon
+                  name="arrow-left-drop-circle-outline"
+                  size={42}
+                  color={
+                    !products.previous
+                      ? AppStyles.ColorStyles.color.gray_400
+                      : AppStyles.ColorStyles.color.primary_normal
+                  }
+                  style={{ padding: 0, margin: 0 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  handlePaging("next");
+                }}
+                activeOpacity={!products.next ? 1 : 0.5}
+              >
+                <MIcon
+                  name="arrow-right-drop-circle-outline"
+                  size={42}
+                  color={
+                    !products.next
+                      ? AppStyles.ColorStyles.color.gray_400
+                      : AppStyles.ColorStyles.color.primary_normal
+                  }
+                  style={{ padding: 0, margin: 0 }}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       ) : null}
     </View>

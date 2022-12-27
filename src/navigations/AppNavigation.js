@@ -22,6 +22,11 @@ import AddProductScreen from "../screen/Shops/AddProductScreen";
 import AddImageProduct from "../screen/Shops/AddImageProduct";
 import AddProductChildScreen from "../screen/Shops/AddProductChildScreen";
 import AddProductVariantScreen from "../screen/Shops/AddProductVariantScreen";
+import MainUpdateProduct from "../screen/Shops/MainUpdateProduct";
+import CartScreen from "../screen/Cart/CartScreen";
+import ViewProductScreen from "../screen/Shops/ViewProductScreen";
+import OrderScreen from "../screen/Cart/OrderScreen";
+import ReviewProductScreen from "../screen/Products/ReviewProductScreen";
 
 import AppStyles from "../theme/AppStyles";
 import Icon from "react-native-vector-icons/FontAwesome5";
@@ -89,6 +94,14 @@ const HomeStack = (props) => {
         }}
         name="ListProductScreen"
         component={ListProductScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: "Đánh giá sản phẩm",
+        }}
+        name="ReviewProductScreen"
+        component={ReviewProductScreen}
       />
     </Stack.Navigator>
   );
@@ -179,6 +192,55 @@ const ProfileStack = (props) => {
         name="AddProductVariantScreen"
         component={AddProductVariantScreen}
       />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+        }}
+        name="MainUpdateProduct"
+        component={MainUpdateProduct}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="ViewProductScreen"
+        component={ViewProductScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const CartStack = (props) => {
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    AuthenticationService.isLogin();
+  }, [props, isFocused]);
+  return (
+    <Stack.Navigator
+      initialRouteName="CartScreen"
+      screenOptions={{
+        headerMode: "float",
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Giỏ hàng",
+          headerTitleAlign: "center",
+        }}
+        name="CartScreen"
+        component={CartScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Thanh toán",
+          headerTitleAlign: "center",
+        }}
+        name="OrderScreen"
+        component={OrderScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -218,6 +280,7 @@ const TabStack = (props) => {
         component={HomeStack}
       />
       <Tab.Screen
+        initialParams={(keyword = "")}
         options={({ route }) => ({
           tabBarStyle: { display: getTabBarVisibility(route) },
           tabBarIcon: ({ color, size }) => (
@@ -258,6 +321,7 @@ const RootNavigator = (props) => {
     >
       <Stack.Screen name="LoginStack" component={LoginStack} />
       <Stack.Screen name="TabStack" component={TabStack} />
+      <Stack.Screen name="CartStack" component={CartStack} />
     </Stack.Navigator>
   );
 };
@@ -312,6 +376,8 @@ const getTabBarVisibility = (route) => {
     "AddImageProduct",
     "AddProductChildScreen",
     "AddProductVariantScreen",
+    "MainUpdateProduct",
+    "ReviewProductScreen",
   ];
   if (checkList.includes(routeName)) {
     return "none";
